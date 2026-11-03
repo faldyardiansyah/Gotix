@@ -21,4 +21,3 @@ return [
         'pemilik' => env('GOTIX_BANK_HOLDER', 'PT Gotix Travel'),
     ],
 ];
-
