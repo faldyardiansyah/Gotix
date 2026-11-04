@@ -17,4 +17,3 @@ class KeluhanController extends Controller
         return view('admin.keluhan.show', ['id' => $id]);
     }
 }
-

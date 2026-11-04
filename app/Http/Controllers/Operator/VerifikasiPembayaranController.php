@@ -17,4 +17,3 @@ class VerifikasiPembayaranController extends Controller
         return view('operator.pembayaran.show', ['id' => $id]);
     }
 }
-

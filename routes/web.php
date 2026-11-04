@@ -32,6 +32,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/keluar', [KeluarController::class, 'destroy'])->name('keluar');
+    Route::post('/logout', [KeluarController::class, 'destroy'])->name('logout');
 });
 
 /*
@@ -62,7 +63,8 @@ Route::middleware(['auth', 'peran:Operator'])->prefix('operator')->name('operato
     Route::get('/pembayaran', [Operator\VerifikasiPembayaranController::class, 'index'])->name('pembayaran.index');
     Route::get('/pembayaran/{id}', [Operator\VerifikasiPembayaranController::class, 'show'])->name('pembayaran.show');
 
-    Route::get('/loket', [Operator\PesananLoketController::class, 'create'])->name('loket.create');
+    Route::get('/loket', [Operator\PesananLoketController::class, 'index'])->name('loket.index');
+    Route::get('/loket/buat', [Operator\PesananLoketController::class, 'create'])->name('loket.create');
 });
 
 /*

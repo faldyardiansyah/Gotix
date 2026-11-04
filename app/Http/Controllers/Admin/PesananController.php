@@ -17,4 +17,3 @@ class PesananController extends Controller
         return view('admin.pesanan.show', ['id' => $id]);
     }
 }
-

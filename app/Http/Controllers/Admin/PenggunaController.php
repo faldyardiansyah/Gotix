@@ -17,4 +17,3 @@ class PenggunaController extends Controller
         return view('admin.pengguna.show', ['id' => $id]);
     }
 }
-

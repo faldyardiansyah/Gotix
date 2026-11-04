@@ -22,4 +22,3 @@ class KendaraanController extends Controller
         return view('admin.kendaraan.edit', ['id' => $id]);
     }
 }
-

@@ -22,4 +22,3 @@ class KotaController extends Controller
         return view('admin.kota.edit', ['id' => $id]);
     }
 }
-

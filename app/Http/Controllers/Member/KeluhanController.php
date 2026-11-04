@@ -17,4 +17,3 @@ class KeluhanController extends Controller
         return view('member.keluhan.create');
     }
 }
-

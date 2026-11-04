@@ -13,6 +13,21 @@ class KotaSeeder extends Seeder
     public function run(): void
     {
         $daftarKota = [
+            // Kota Besar Nasional & Rute Populer se-Indonesia
+            'Jakarta',
+            'Bandung',
+            'Yogyakarta',
+            'Surabaya',
+            'Semarang',
+            'Malang',
+            'Solo',
+            'Denpasar',
+            'Medan',
+            'Pekanbaru',
+            'Palembang',
+            'Padang',
+            'Makassar',
+            // Rute Regional Lampung
             'Bandar Lampung',
             'Metro',
             'Kalianda',

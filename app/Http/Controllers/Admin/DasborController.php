@@ -12,4 +12,3 @@ class DasborController extends Controller
         return view('admin.dasbor');
     }
 }
-

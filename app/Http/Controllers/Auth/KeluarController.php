@@ -22,4 +22,3 @@ class KeluarController extends Controller
         return redirect()->route('masuk');
     }
 }
-

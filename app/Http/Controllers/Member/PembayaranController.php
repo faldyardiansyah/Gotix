@@ -17,4 +17,3 @@ class PembayaranController extends Controller
         return view('member.pembayaran.konfirmasi', ['kode' => $kode]);
     }
 }
-

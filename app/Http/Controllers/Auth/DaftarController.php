@@ -48,4 +48,3 @@ class DaftarController extends Controller
         return redirect()->route('member.tiket.index');
     }
 }
-
