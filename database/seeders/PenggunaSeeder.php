@@ -12,91 +12,50 @@ class PenggunaSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * Hanya 3 akun uji sesuai data dosen — tanpa member fiktif tambahan.
      */
     public function run(): void
     {
-        $passwordDemo = Hash::make('password');
-
-        // 1 Admin
+        // Admin
         Pengguna::firstOrCreate(
             ['username' => 'admin'],
             [
-                'nama' => 'Administrator Gotix',
-                'email' => 'admin@gotix.test',
-                'telepon' => '081234567890',
-                'alamat' => 'Jl. Raden Intan No. 1, Enggal, Bandar Lampung',
+                'nama'          => 'Administrator',
+                'email'         => 'admin@gotix.test',
+                'telepon'       => '081234567890',
+                'alamat'        => 'Bandar Lampung',
                 'jenis_kelamin' => JenisKelamin::L,
-                'peran' => PeranPengguna::Admin,
-                'password' => $passwordDemo,
+                'peran'         => PeranPengguna::Admin,
+                'password'      => Hash::make('admin123'),
             ]
         );
 
-        // 1 Operator
+        // Operator
         Pengguna::firstOrCreate(
             ['username' => 'operator'],
             [
-                'nama' => 'Operator Loket Gotix',
-                'email' => 'operator@gotix.test',
-                'telepon' => '081234567891',
-                'alamat' => 'Jl. Teuku Umar No. 10, Kedaton, Bandar Lampung',
+                'nama'          => 'Operator Loket',
+                'email'         => 'operator@gotix.test',
+                'telepon'       => '081234567891',
+                'alamat'        => 'Bandar Lampung',
                 'jenis_kelamin' => JenisKelamin::L,
-                'peran' => PeranPengguna::Operator,
-                'password' => $passwordDemo,
+                'peran'         => PeranPengguna::Operator,
+                'password'      => Hash::make('operator123'),
             ]
         );
 
-        // 5 Member Demo
-        $daftarMember = [
+        // Member
+        Pengguna::firstOrCreate(
+            ['username' => 'member'],
             [
-                'nama' => 'Budi Santoso',
-                'username' => 'member1',
-                'email' => 'budi@gotix.test',
-                'telepon' => '081270001001',
-                'alamat' => 'Jl. ZA Pagar Alam No. 5, Rajabasa, Bandar Lampung',
+                'nama'          => 'Member Demo',
+                'email'         => 'member@gotix.test',
+                'telepon'       => '081234567892',
+                'alamat'        => 'Bandar Lampung',
                 'jenis_kelamin' => JenisKelamin::L,
-            ],
-            [
-                'nama' => 'Siti Rahma',
-                'username' => 'member2',
-                'email' => 'siti@gotix.test',
-                'telepon' => '081270001002',
-                'alamat' => 'Jl. Kartini No. 12, Tanjung Karang Pusat, Bandar Lampung',
-                'jenis_kelamin' => JenisKelamin::P,
-            ],
-            [
-                'nama' => 'Agus Setiawan',
-                'username' => 'member3',
-                'email' => 'agus@gotix.test',
-                'telepon' => '081270001003',
-                'alamat' => 'Jl. Gajah Mada No. 44, Kedamaian, Bandar Lampung',
-                'jenis_kelamin' => JenisKelamin::L,
-            ],
-            [
-                'nama' => 'Dewi Lestari',
-                'username' => 'member4',
-                'email' => 'dewi@gotix.test',
-                'telepon' => '081270001004',
-                'alamat' => 'Jl. Diponegoro No. 8, Teluk Betung Utara, Bandar Lampung',
-                'jenis_kelamin' => JenisKelamin::P,
-            ],
-            [
-                'nama' => 'Eko Prasetyo',
-                'username' => 'member5',
-                'email' => 'eko@gotix.test',
-                'telepon' => '081270001005',
-                'alamat' => 'Jl. Wolter Monginsidi No. 15, Teluk Betung Selatan, Bandar Lampung',
-                'jenis_kelamin' => JenisKelamin::L,
-            ],
-        ];
-
-        foreach ($daftarMember as $member) {
-            Pengguna::firstOrCreate(
-                ['username' => $member['username']],
-                array_merge($member, [
-                    'peran' => PeranPengguna::Member,
-                    'password' => $passwordDemo,
-                ])
-            );
-        }
+                'peran'         => PeranPengguna::Member,
+                'password'      => Hash::make('member123'),
+            ]
+        );
     }
 }

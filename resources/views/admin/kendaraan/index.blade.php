@@ -1,225 +1,73 @@
-@extends('layouts.tamu')
+@extends('layouts.admin')
 
-@section('title', 'Master Armada Travel — Admin Gotix')
+@section('title', 'Master Armada — Admin Gotix')
+@section('page-title', 'Master Data Armada Kendaraan')
+@section('page-subtitle', 'Kelola unit kendaraan travel berkapasitas 5 kursi.')
 
 @section('konten')
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12"
-     x-data="{
-        modalTambah: false,
-        modalEdit: false,
-        modelEdit: '',
-        platEdit: '',
-        warnaEdit: '',
-        statusEdit: 'Aktif',
-        bukaEdit(model, plat, warna, status) {
-            this.modelEdit = model;
-            this.platEdit = plat;
-            this.warnaEdit = warna;
-            this.statusEdit = status;
-            this.modalEdit = true;
-        }
-     }">
-
-    @include('admin._nav', [
-        'judul' => 'Master Armada Kendaraan',
-        'deskripsi' => 'Manajemen unit armada operasional berkapasitas 5 kursi eksklusif di seluruh rute travel.'
-    ])
-
-    <!-- Aksi Bar -->
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4" data-aos="fade-down" data-aos-duration="400">
-        <div class="text-xs text-slate-500">
-            Total Unit: <span class="font-bold text-slate-900">4 Unit Kendaraan Siap Operasi</span>
-        </div>
-
-        <button type="button" @click="modalTambah = true"
-                class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 rounded-xl transition shadow-sm self-start sm:self-auto cursor-pointer">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            <span>Tambah Armada Baru</span>
-        </button>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div class="text-sm text-slate-600">
+        Total <strong class="text-slate-900">{{ $daftarKendaraan->count() }}</strong> unit armada
     </div>
+    <a href="{{ route('admin.kendaraan.create') }}"
+       class="inline-flex items-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition shadow-xs">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        <span>Tambah Armada</span>
+    </a>
+</div>
 
-    @php
-        $daftarArmada = [
-            [
-                'id' => 1,
-                'model' => 'Toyota HiAce Premio Executive',
-                'plat' => 'BE 1212 AT',
-                'warna' => 'Hitam Metalik',
-                'kapasitas' => 5,
-                'status' => 'Aktif',
-                'badge' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                'dot' => 'bg-emerald-500',
-            ],
-            [
-                'id' => 2,
-                'model' => 'Isuzu Elf Executive Captain Seat',
-                'plat' => 'BE 4677 DT',
-                'warna' => 'Biru Tua',
-                'kapasitas' => 5,
-                'status' => 'Aktif',
-                'badge' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                'dot' => 'bg-emerald-500',
-            ],
-            [
-                'id' => 3,
-                'model' => 'Toyota Avanza Veloz Prime',
-                'plat' => 'BE 7890 XY',
-                'warna' => 'Putih Mutiara',
-                'kapasitas' => 5,
-                'status' => 'Aktif',
-                'badge' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                'dot' => 'bg-emerald-500',
-            ],
-            [
-                'id' => 4,
-                'model' => 'Toyota Innova Zenix Hybrid',
-                'plat' => 'DD 1928 MN',
-                'warna' => 'Abu-abu Gelap',
-                'kapasitas' => 5,
-                'status' => 'Servis Rutin',
-                'badge' => 'bg-amber-50 text-amber-700 border-amber-200',
-                'dot' => 'bg-amber-500',
-            ],
-        ];
-    @endphp
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+    @forelse ($daftarKendaraan as $kendaraan)
+        <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs">
+            <div class="flex items-start justify-between gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                    </svg>
+                </div>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
+                    {{ $kendaraan->kapasitas_kursi ?? 5 }} Kursi
+                </span>
+            </div>
 
-    <!-- Tabel Master Armada -->
-    <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm" data-aos="fade-up" data-aos-duration="500">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
-                <thead class="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    <tr>
-                        <th class="px-6 py-4">Tipe & Model Mobil</th>
-                        <th class="px-6 py-4">Nomor Polisi</th>
-                        <th class="px-6 py-4">Warna Eksterior</th>
-                        <th class="px-6 py-4">Kapasitas Kursi</th>
-                        <th class="px-6 py-4">Status Kondisi</th>
-                        <th class="px-6 py-4 text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @foreach ($daftarArmada as $item)
-                        <tr class="hover:bg-slate-50/60 transition duration-100">
-                            <td class="px-6 py-4 font-bold text-slate-900 text-xs">
-                                {{ $item['model'] }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="font-mono text-xs font-bold px-2.5 py-1 rounded bg-slate-100 text-slate-800 border border-slate-200">
-                                    {{ $item['plat'] }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-xs text-slate-600">
-                                {{ $item['warna'] }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-sky-600">
-                                {{ $item['kapasitas'] }} Penumpang
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border {{ $item['badge'] }}">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ $item['dot'] }}"></span>
-                                    {{ $item['status'] }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right space-x-2">
-                                <button type="button"
-                                        @click="bukaEdit('{{ $item['model'] }}', '{{ $item['plat'] }}', '{{ $item['warna'] }}', '{{ $item['status'] }}')"
-                                        class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition cursor-pointer">
-                                    Edit
-                                </button>
-                                <button type="button"
-                                        onclick="if(confirm('Hapus armada {{ $item['plat'] }}?')) alert('Unit kendaraan berhasil dihapus.');"
-                                        class="px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg transition cursor-pointer">
-                                    Hapus
-                                </button>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
+            <h3 class="font-heading font-bold text-slate-900 text-sm">{{ $kendaraan->jenis_kendaraan }}</h3>
+            <div class="mt-2 space-y-1 text-xs text-slate-600">
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400 w-20">Nomor Polisi</span>
+                    <span class="font-mono font-semibold text-slate-900">{{ $kendaraan->nomor_polisi }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400 w-20">Warna</span>
+                    <span class="font-medium">{{ $kendaraan->warna }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400 w-20">Total Jadwal</span>
+                    <span class="font-medium">{{ $kendaraan->jadwal_count }} jadwal</span>
+                </div>
+            </div>
 
-    <!-- Modal Tambah Armada -->
-    <div x-show="modalTambah"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
-         x-cloak>
-        <div @click.away="modalTambah = false"
-             class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-4">
-            <h3 class="font-heading font-bold text-slate-900 text-base">Tambah Unit Armada Baru</h3>
-            <form onsubmit="event.preventDefault(); alert('Unit kendaraan baru berhasil ditambahkan.'); modalTambah = false; window.location.reload();" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Model / Varian Kendaraan</label>
-                    <input type="text" required placeholder="Contoh: Toyota HiAce Premio Executive"
-                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Polisi (Plat)</label>
-                    <input type="text" required placeholder="Contoh: B 1029 KJA"
-                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Warna Kendaraan</label>
-                    <input type="text" required placeholder="Contoh: Silver Metalik"
-                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                </div>
-                <div class="flex items-center justify-end gap-2 pt-2">
-                    <button type="button" @click="modalTambah = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Batal</button>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2">
+                <a href="{{ route('admin.kendaraan.edit', $kendaraan->id) }}"
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg transition">
+                    Edit
+                </a>
+                <form action="{{ route('admin.kendaraan.destroy', $kendaraan->id) }}" method="POST"
+                      onsubmit="return confirm('Hapus armada {{ $kendaraan->nomor_polisi }}?')">
+                    @csrf
+                    @method('DELETE')
                     <button type="submit"
-                            class="px-5 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl">Simpan Armada</button>
-                </div>
-            </form>
+                            class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition">
+                        Hapus
+                    </button>
+                </form>
+            </div>
         </div>
-    </div>
-
-    <!-- Modal Edit Armada -->
-    <div x-show="modalEdit"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
-         x-cloak>
-        <div @click.away="modalEdit = false"
-             class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-4">
-            <h3 class="font-heading font-bold text-slate-900 text-base">Edit Unit Armada</h3>
-            <form onsubmit="event.preventDefault(); alert('Data armada berhasil diperbarui.'); modalEdit = false;" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Model / Varian Kendaraan</label>
-                    <input type="text" x-model="modelEdit" required
-                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Polisi (Plat)</label>
-                    <input type="text" x-model="platEdit" required
-                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Warna Kendaraan</label>
-                    <input type="text" x-model="warnaEdit" required
-                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Status Operasional</label>
-                    <select x-model="statusEdit"
-                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                        <option value="Aktif">Aktif Beroperasi</option>
-                        <option value="Servis Rutin">Servis Rutin / Perbaikan</option>
-                        <option value="Nonaktif">Nonaktif Sementara</option>
-                    </select>
-                </div>
-                <div class="flex items-center justify-end gap-2 pt-2">
-                    <button type="button" @click="modalEdit = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Batal</button>
-                    <button type="submit"
-                            class="px-5 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-xl">Simpan Perubahan</button>
-                </div>
-            </form>
+    @empty
+        <div class="col-span-3 py-12 text-center bg-white border border-slate-200 rounded-2xl">
+            <div class="text-sm text-slate-500">Belum ada armada kendaraan terdaftar.</div>
         </div>
-    </div>
+    @endforelse
 </div>
 @endsection

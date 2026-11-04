@@ -178,7 +178,7 @@
 
                             @if ($sisaKursi > 0)
                                 @auth
-                                    <a href="{{ route('member.tiket.index') }}"
+                                    <a href="{{ route('member.pesanan.create', $jadwal->id) }}"
                                        class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 rounded-xl transition shadow-xs">
                                         <span>Pesan Kursi</span>
                                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -276,7 +276,7 @@
                                 </span>
 
                                 @auth
-                                    <a href="{{ route('member.tiket.index') }}"
+                                    <a href="{{ route('member.pesanan.create', $jadwal->id) }}"
                                        class="px-3 py-1.5 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-lg transition">
                                         Pesan
                                     </a>

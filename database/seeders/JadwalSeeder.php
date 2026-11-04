@@ -12,62 +12,59 @@ class JadwalSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * Data jadwal sesuai data dosen (db_tiket2) — 6 jadwal dari Bandar Lampung,
+     * tanggal disesuaikan ke masa depan agar bisa dipesan.
      */
     public function run(): void
     {
-        $semuaKendaraan = Kendaraan::all();
-        if ($semuaKendaraan->isEmpty()) {
+        $avanza = Kendaraan::where('nomor_polisi', 'BE 1212 AT')->first();
+        $xenia  = Kendaraan::where('nomor_polisi', 'BE 4677 DT')->first();
+
+        if (! $avanza || ! $xenia) {
             return;
         }
 
-        $pasanganRute = [
-            // Rute Populer Nasional
-            ['asal' => 'Jakarta', 'tujuan' => 'Bandung', 'harga' => 120000, 'jam' => ['07:30:00', '13:00:00', '17:30:00']],
-            ['asal' => 'Bandung', 'tujuan' => 'Jakarta', 'harga' => 120000, 'jam' => ['08:00:00', '14:00:00', '19:00:00']],
-            ['asal' => 'Yogyakarta', 'tujuan' => 'Surabaya', 'harga' => 180000, 'jam' => ['08:00:00', '15:30:00']],
-            ['asal' => 'Surabaya', 'tujuan' => 'Yogyakarta', 'harga' => 180000, 'jam' => ['09:00:00', '16:00:00']],
-            ['asal' => 'Semarang', 'tujuan' => 'Solo', 'harga' => 75000, 'jam' => ['07:00:00', '11:00:00', '16:00:00']],
-            ['asal' => 'Solo', 'tujuan' => 'Semarang', 'harga' => 75000, 'jam' => ['08:30:00', '13:30:00', '17:30:00']],
-            ['asal' => 'Surabaya', 'tujuan' => 'Malang', 'harga' => 65000, 'jam' => ['06:30:00', '10:00:00', '14:30:00', '18:30:00']],
-            ['asal' => 'Malang', 'tujuan' => 'Surabaya', 'harga' => 65000, 'jam' => ['07:00:00', '11:00:00', '15:00:00', '19:00:00']],
-            ['asal' => 'Medan', 'tujuan' => 'Pekanbaru', 'harga' => 240000, 'jam' => ['09:00:00', '20:00:00']],
-            ['asal' => 'Pekanbaru', 'tujuan' => 'Medan', 'harga' => 240000, 'jam' => ['09:00:00', '20:00:00']],
-            ['asal' => 'Jakarta', 'tujuan' => 'Bandar Lampung', 'harga' => 220000, 'jam' => ['08:00:00', '20:30:00']],
-            ['asal' => 'Bandar Lampung', 'tujuan' => 'Jakarta', 'harga' => 220000, 'jam' => ['09:00:00', '21:00:00']],
-            ['asal' => 'Denpasar', 'tujuan' => 'Surabaya', 'harga' => 260000, 'jam' => ['18:00:00']],
-            // Rute Regional Lampung
-            ['asal' => 'Bandar Lampung', 'tujuan' => 'Metro', 'harga' => 45000, 'jam' => ['08:00:00', '13:00:00', '16:30:00']],
-            ['asal' => 'Metro', 'tujuan' => 'Bandar Lampung', 'harga' => 45000, 'jam' => ['08:30:00', '13:30:00', '17:00:00']],
-            ['asal' => 'Bandar Lampung', 'tujuan' => 'Gunung Sugih', 'harga' => 55000, 'jam' => ['09:00:00', '14:00:00']],
-            ['asal' => 'Bandar Lampung', 'tujuan' => 'Liwa', 'harga' => 80000, 'jam' => ['08:00:00', '15:00:00']],
-            ['asal' => 'Bandar Lampung', 'tujuan' => 'Pringsewu', 'harga' => 40000, 'jam' => ['09:30:00', '15:30:00']],
+        $bandarLampung = Kota::where('nama_kota', 'Bandar Lampung')->first();
+        if (! $bandarLampung) {
+            return;
+        }
+
+        // 6 jadwal dari data dosen, tanggal digeser ke depan
+        $ruteDosen = [
+            // asal=Bandar Lampung (id1), tujuan=Metro (id2), Xenia, harga 60000, 08:21
+            ['tujuan' => 'Metro',          'harga' => 60000, 'jam' => '08:21:00', 'kendaraan' => $xenia,  'hari_ke' => 1],
+            // asal=Bandar Lampung (id1), tujuan=Lampung Tengah (id3), Avanza, harga 50000, 06:31
+            ['tujuan' => 'Lampung Tengah', 'harga' => 50000, 'jam' => '06:31:00', 'kendaraan' => $avanza, 'hari_ke' => 1],
+            // asal=Bandar Lampung (id1), tujuan=Lampung Barat (id9), Avanza, harga 70000, 08:00
+            ['tujuan' => 'Lampung Barat',  'harga' => 70000, 'jam' => '08:00:00', 'kendaraan' => $avanza, 'hari_ke' => 2],
+            // asal=Bandar Lampung (id1), tujuan=Lampung Selatan (id5), Xenia, harga 40000, 01:01
+            ['tujuan' => 'Lampung Selatan','harga' => 40000, 'jam' => '08:00:00', 'kendaraan' => $xenia,  'hari_ke' => 2],
+            // asal=Bandar Lampung (id1), tujuan=Pringsewu (id7), Avanza, harga 50000, 02:01
+            ['tujuan' => 'Pringsewu',      'harga' => 50000, 'jam' => '09:00:00', 'kendaraan' => $avanza, 'hari_ke' => 3],
+            // asal=Bandar Lampung (id1), tujuan=Tanggamus (id6), Xenia, harga 80000, 10:00
+            ['tujuan' => 'Tanggamus',      'harga' => 80000, 'jam' => '10:00:00', 'kendaraan' => $xenia,  'hari_ke' => 3],
         ];
 
-        // Buat jadwal untuk 7 hari ke depan
-        for ($hari = 0; $hari <= 7; $hari++) {
-            $tanggal = Carbon::now()->addDays($hari)->format('Y-m-d');
-
-            foreach ($pasanganRute as $idxRute => $rute) {
-                $kotaAsal = Kota::where('nama_kota', $rute['asal'])->first();
-                $kotaTujuan = Kota::where('nama_kota', $rute['tujuan'])->first();
-
-                if (! $kotaAsal || ! $kotaTujuan) {
-                    continue;
-                }
-
-                foreach ($rute['jam'] as $idxJam => $jam) {
-                    $kendaraan = $semuaKendaraan[($idxRute + $idxJam) % $semuaKendaraan->count()];
-
-                    Jadwal::firstOrCreate([
-                        'kota_asal_id' => $kotaAsal->id,
-                        'kota_tujuan_id' => $kotaTujuan->id,
-                        'kendaraan_id' => $kendaraan->id,
-                        'harga' => $rute['harga'],
-                        'tanggal_berangkat' => $tanggal,
-                        'jam_berangkat' => $jam,
-                    ]);
-                }
+        foreach ($ruteDosen as $rute) {
+            $kotaTujuan = Kota::where('nama_kota', $rute['tujuan'])->first();
+            if (! $kotaTujuan) {
+                continue;
             }
+
+            $tanggal = Carbon::now()->addDays($rute['hari_ke'])->format('Y-m-d');
+
+            Jadwal::firstOrCreate(
+                [
+                    'kota_asal_id'   => $bandarLampung->id,
+                    'kota_tujuan_id' => $kotaTujuan->id,
+                    'kendaraan_id'   => $rute['kendaraan']->id,
+                    'tanggal_berangkat' => $tanggal,
+                    'jam_berangkat'  => $rute['jam'],
+                ],
+                [
+                    'harga' => $rute['harga'],
+                ]
+            );
         }
     }
 }
