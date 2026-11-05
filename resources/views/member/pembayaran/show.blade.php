@@ -8,6 +8,15 @@
         copiedBank: false,
         copiedRekening: false,
         copiedTotal: false,
+        previewUrl: null,
+        fileName: '',
+        handleFile(e) {
+            const file = e.target.files[0];
+            if (file) {
+                this.fileName = file.name;
+                this.previewUrl = URL.createObjectURL(file);
+            }
+        },
         copyText(text, target) {
             navigator.clipboard.writeText(text);
             this[target] = true;
@@ -159,34 +168,63 @@
                         @csrf
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Rekening Pengirim</label>
-                            <input type="text" name="nama_pengirim" required value="{{ old('nama_pengirim', Auth::user()->nama ?? '') }}"
-                                   placeholder="Contoh: Budi Santoso"
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nama & Rekening Pengirim</label>
+                            <input type="text" name="rekening_pengirim" required value="{{ old('rekening_pengirim', Auth::user()->nama ?? '') }}"
+                                   placeholder="Contoh: BCA - Budi Santoso"
                                    class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Jumlah Nominal yang Ditransfer (Rp)</label>
-                            <input type="number" name="jumlah_bayar" required value="{{ old('jumlah_bayar', $pesanan->harga_snapshot) }}" min="1000"
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Resi / Referensi Transfer (Opsional)</label>
+                            <input type="text" name="nomor_resi" value="{{ old('nomor_resi') }}"
+                                   placeholder="Contoh: TRX98124892 (Boleh kosong, otomatis dibuat)"
                                    class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition font-mono">
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Catatan Tambahan (Opsional)</label>
-                            <input type="text" name="catatan" value="{{ old('catatan') }}" placeholder="Contoh: Transfer via m-BCA a.n Budi"
-                                   class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Transfer</label>
+                                <input type="date" name="tanggal_transfer" value="{{ old('tanggal_transfer', date('Y-m-d')) }}"
+                                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Jam Transfer</label>
+                                <input type="time" name="jam_transfer" value="{{ old('jam_transfer', date('H:i')) }}"
+                                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            </div>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1">Pilih Foto / Struk Bukti Bayar</label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Foto / Tangkapan Layar Struk Transfer</label>
+                            
+                            <!-- Box Upload File -->
                             <div class="relative border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl p-4 text-center cursor-pointer transition bg-slate-50/50">
-                                <input type="file" name="bukti_transfer" accept="image/*" required
+                                <input type="file" name="bukti_transfer" accept="image/*" required @change="handleFile($event)"
                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                                <svg class="w-8 h-8 text-slate-400 mx-auto mb-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                                </svg>
-                                <div class="text-xs font-semibold text-slate-700">Pilih berkas foto struk transfer</div>
-                                <div class="text-[10px] text-slate-400 mt-0.5">JPG, JPEG, PNG (Maks. 2MB)</div>
+                                
+                                <template x-if="!previewUrl">
+                                    <div>
+                                        <svg class="w-8 h-8 text-slate-400 mx-auto mb-1.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                        </svg>
+                                        <div class="text-xs font-semibold text-slate-700">Pilih berkas foto struk transfer</div>
+                                        <div class="text-[10px] text-slate-400 mt-0.5">JPG, JPEG, PNG (Maks. 5MB)</div>
+                                    </div>
+                                </template>
+
+                                <!-- Pratinjau Gambar Langsung Setelah Dipilih -->
+                                <template x-if="previewUrl">
+                                    <div class="space-y-2">
+                                        <img :src="previewUrl" alt="Pratinjau Foto" class="max-h-48 mx-auto rounded-xl object-contain border border-slate-200">
+                                        <div class="text-xs font-semibold text-emerald-600 flex items-center justify-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                            </svg>
+                                            <span x-text="fileName"></span>
+                                        </div>
+                                        <span class="text-[10px] text-slate-400 block">Klik area ini jika ingin mengganti foto</span>
+                                    </div>
+                                </template>
                             </div>
                         </div>
 
@@ -198,16 +236,17 @@
                 @else
                     <!-- SUDAH UPLOAD BUKTI -->
                     <div class="space-y-4">
-                        @if ($pesanan->konfirmasiPembayaran && $pesanan->konfirmasiPembayaran->bukti_transfer)
+                        @if ($pesanan->konfirmasiPembayaran && $pesanan->konfirmasiPembayaran->bukti_path)
                             <div>
                                 <span class="text-xs font-semibold text-slate-700 block mb-2">Struk yang Telah Diunggah:</span>
                                 <div class="border border-slate-200 rounded-2xl overflow-hidden bg-slate-50">
-                                    <img src="{{ asset('storage/' . $pesanan->konfirmasiPembayaran->bukti_transfer) }}"
+                                    <img src="{{ asset('storage/' . $pesanan->konfirmasiPembayaran->bukti_path) }}"
                                          alt="Bukti Transfer" class="w-full max-h-64 object-cover">
                                 </div>
                                 <div class="text-[11px] text-slate-500 mt-2 space-y-0.5">
-                                    <p>• Atas nama: <strong>{{ $pesanan->konfirmasiPembayaran->nama_pengirim }}</strong></p>
-                                    <p>• Nominal: <strong>Rp {{ number_format($pesanan->konfirmasiPembayaran->jumlah_bayar, 0, ',', '.') }}</strong></p>
+                                    <p>• Rekening Pengirim: <strong>{{ $pesanan->konfirmasiPembayaran->rekening_pengirim }}</strong></p>
+                                    <p>• Resi/Referensi: <strong class="font-mono">{{ $pesanan->konfirmasiPembayaran->nomor_resi }}</strong></p>
+                                    <p>• Waktu Transfer: <strong>{{ $pesanan->konfirmasiPembayaran->tanggal_transfer ? date('d M Y', strtotime($pesanan->konfirmasiPembayaran->tanggal_transfer)) : '-' }} {{ $pesanan->konfirmasiPembayaran->jam_transfer ? substr($pesanan->konfirmasiPembayaran->jam_transfer, 0, 5) : '' }}</strong></p>
                                 </div>
                             </div>
                         @endif

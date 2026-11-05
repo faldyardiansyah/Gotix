@@ -95,26 +95,26 @@
                 @if ($pesanan->konfirmasiPembayaran)
                     <div class="mt-4 space-y-3 text-xs">
                         <div class="flex justify-between">
-                            <span class="text-slate-400">Nama Pengirim</span>
-                            <span class="font-semibold text-slate-900">{{ $pesanan->konfirmasiPembayaran->nama_pengirim }}</span>
+                            <span class="text-slate-400">Rekening Pengirim</span>
+                            <span class="font-semibold text-slate-900">{{ $pesanan->konfirmasiPembayaran->rekening_pengirim }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-400">Nominal Transfer</span>
-                            <span class="font-bold text-emerald-600">Rp {{ number_format($pesanan->konfirmasiPembayaran->jumlah_bayar, 0, ',', '.') }}</span>
+                            <span class="text-slate-400">Nomor Resi / Referensi</span>
+                            <span class="font-mono font-bold text-slate-800">{{ $pesanan->konfirmasiPembayaran->nomor_resi }}</span>
                         </div>
-                        @if ($pesanan->konfirmasiPembayaran->catatan)
-                            <div class="pt-1">
-                                <span class="text-slate-400">Catatan Pengirim:</span>
-                                <p class="text-slate-700 italic mt-0.5">{{ $pesanan->konfirmasiPembayaran->catatan }}</p>
-                            </div>
-                        @endif
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Waktu Transfer</span>
+                            <span class="text-slate-700 font-medium">
+                                {{ $pesanan->konfirmasiPembayaran->tanggal_transfer ? date('d M Y', strtotime($pesanan->konfirmasiPembayaran->tanggal_transfer)) : '-' }}
+                            </span>
+                        </div>
 
                         <div class="pt-2">
                             <span class="font-semibold text-slate-700 block mb-2">Foto Struk Bukti Transfer:</span>
-                            @if ($pesanan->konfirmasiPembayaran->bukti_transfer)
-                                <a href="{{ asset('storage/' . $pesanan->konfirmasiPembayaran->bukti_transfer) }}" target="_blank"
+                            @if ($pesanan->konfirmasiPembayaran->bukti_path)
+                                <a href="{{ asset('storage/' . $pesanan->konfirmasiPembayaran->bukti_path) }}" target="_blank"
                                    class="block border border-slate-200 rounded-xl overflow-hidden hover:opacity-90 transition">
-                                    <img src="{{ asset('storage/' . $pesanan->konfirmasiPembayaran->bukti_transfer) }}"
+                                    <img src="{{ asset('storage/' . $pesanan->konfirmasiPembayaran->bukti_path) }}"
                                          alt="Bukti Transfer" class="w-full max-h-52 object-cover bg-slate-50">
                                     <span class="block text-center text-[11px] text-sky-600 py-1.5 bg-slate-50 border-t border-slate-100 font-medium">
                                         Perbesar bukti transfer ↗
@@ -139,7 +139,7 @@
                       onsubmit="return confirm('Verifikasi pesanan ini menjadi Lunas?')">
                     @csrf
                     <button type="submit"
-                            class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-xs text-center">
+                            class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-xs text-center cursor-pointer">
                         Terima (Lunas)
                     </button>
                 </form>
@@ -148,7 +148,7 @@
                       onsubmit="return confirm('Tolak dan batalkan pesanan ini?')">
                     @csrf
                     <button type="submit"
-                            class="w-full py-2.5 px-4 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition text-center">
+                            class="w-full py-2.5 px-4 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition text-center cursor-pointer">
                         Tolak Pesanan
                     </button>
                 </form>

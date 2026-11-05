@@ -134,15 +134,17 @@
                 </div>
             </div>
 
-            @if ($pesanan->konfirmasiPembayaran && $pesanan->konfirmasiPembayaran->bukti_transfer)
+            @if ($pesanan->konfirmasiPembayaran && $pesanan->konfirmasiPembayaran->bukti_path)
                 <div class="mt-6 border border-slate-200 rounded-2xl p-5 bg-slate-50 space-y-3">
-                    <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">Foto Bukti Transfer yang Anda Kirim:</span>
-                    <div class="max-w-xs border border-slate-200 rounded-xl overflow-hidden bg-white">
-                        <img src="{{ asset('storage/' . $pesanan->konfirmasiPembayaran->bukti_transfer) }}"
+                    <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">Foto Bukti Transfer yang Telah Anda Unggah:</span>
+                    <div class="max-w-xs border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs">
+                        <img src="{{ asset('storage/' . $pesanan->konfirmasiPembayaran->bukti_path) }}"
                              alt="Bukti Transfer" class="w-full h-auto object-cover">
                     </div>
-                    <div class="text-xs text-slate-500">
-                        Pengirim: <strong>{{ $pesanan->konfirmasiPembayaran->nama_pengirim }}</strong> • Nominal: <strong>Rp {{ number_format($pesanan->konfirmasiPembayaran->jumlah_bayar, 0, ',', '.') }}</strong>
+                    <div class="text-xs text-slate-600 space-y-0.5">
+                        <p>• Rekening Pengirim: <strong>{{ $pesanan->konfirmasiPembayaran->rekening_pengirim }}</strong></p>
+                        <p>• Resi: <strong class="font-mono">{{ $pesanan->konfirmasiPembayaran->nomor_resi }}</strong></p>
+                        <p>• Waktu: <strong>{{ $pesanan->konfirmasiPembayaran->tanggal_transfer ? date('d M Y', strtotime($pesanan->konfirmasiPembayaran->tanggal_transfer)) : '-' }}</strong></p>
                     </div>
                 </div>
             @endif

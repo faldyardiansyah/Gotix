@@ -6,7 +6,6 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12"
      x-data="{
         modalBukti: false,
-        modalTolak: false,
      }">
 
     @php
@@ -97,21 +96,20 @@
                         <span class="font-mono font-bold text-slate-900 text-sm">Rp {{ number_format($pesanan->harga_snapshot, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex items-center justify-between text-xs">
-                        <span class="text-slate-500">Nama Pengirim Transfer</span>
-                        <span class="font-medium text-slate-800">{{ $pesanan->konfirmasiPembayaran?->nama_pengirim ?? 'Belum ada konfirmasi' }}</span>
+                        <span class="text-slate-500">Rekening / Pengirim</span>
+                        <span class="font-medium text-slate-800">{{ $pesanan->konfirmasiPembayaran?->rekening_pengirim ?? 'Belum ada konfirmasi' }}</span>
                     </div>
                     <div class="flex items-center justify-between text-xs">
-                        <span class="text-slate-500">Nominal yang Ditransfer</span>
-                        <span class="font-bold text-emerald-600">
-                            {{ $pesanan->konfirmasiPembayaran ? 'Rp ' . number_format($pesanan->konfirmasiPembayaran->jumlah_bayar, 0, ',', '.') : '-' }}
+                        <span class="text-slate-500">Nomor Resi / Referensi</span>
+                        <span class="font-mono font-bold text-slate-800">{{ $pesanan->konfirmasiPembayaran?->nomor_resi ?? '-' }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-slate-500">Waktu Transfer</span>
+                        <span class="text-slate-800 font-medium">
+                            {{ $pesanan->konfirmasiPembayaran?->tanggal_transfer ? date('d M Y', strtotime($pesanan->konfirmasiPembayaran->tanggal_transfer)) : '-' }}
+                            {{ $pesanan->konfirmasiPembayaran?->jam_transfer ? substr($pesanan->konfirmasiPembayaran->jam_transfer, 0, 5) . ' WIB' : '' }}
                         </span>
                     </div>
-                    @if ($pesanan->konfirmasiPembayaran?->catatan)
-                        <div class="pt-2 border-t border-slate-100 text-xs">
-                            <span class="text-slate-500">Catatan Pengirim:</span>
-                            <p class="text-slate-700 italic mt-0.5">{{ $pesanan->konfirmasiPembayaran->catatan }}</p>
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>
@@ -125,10 +123,10 @@
                     <span class="text-[11px] text-slate-400">Klik untuk perbesar</span>
                 </div>
 
-                @if ($pesanan->konfirmasiPembayaran && $pesanan->konfirmasiPembayaran->bukti_transfer)
+                @if ($pesanan->konfirmasiPembayaran && $pesanan->konfirmasiPembayaran->bukti_path)
                     <div @click="modalBukti = true"
                          class="relative border border-slate-200 rounded-2xl overflow-hidden bg-slate-100 group cursor-pointer shadow-xs aspect-[3/4] flex items-center justify-center">
-                        <img src="{{ asset('storage/' . $pesanan->konfirmasiPembayaran->bukti_transfer) }}"
+                        <img src="{{ asset('storage/' . $pesanan->konfirmasiPembayaran->bukti_path) }}"
                              alt="Bukti Transfer Penumpang" class="w-full h-full object-cover">
                         <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
                             <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/80 backdrop-blur-sm text-xs font-semibold">
@@ -180,7 +178,7 @@
     </div>
 
     <!-- Modal Pratinjau Gambar Struk (Zoom In) -->
-    @if ($pesanan->konfirmasiPembayaran && $pesanan->konfirmasiPembayaran->bukti_transfer)
+    @if ($pesanan->konfirmasiPembayaran && $pesanan->konfirmasiPembayaran->bukti_path)
         <div x-show="modalBukti"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -201,7 +199,7 @@
                     </button>
                 </div>
                 <div>
-                    <img src="{{ asset('storage/' . $pesanan->konfirmasiPembayaran->bukti_transfer) }}"
+                    <img src="{{ asset('storage/' . $pesanan->konfirmasiPembayaran->bukti_path) }}"
                          alt="Bukti Transfer Penuh" class="w-full max-h-[70vh] object-contain rounded-2xl bg-slate-50">
                 </div>
                 <button @click="modalBukti = false"
