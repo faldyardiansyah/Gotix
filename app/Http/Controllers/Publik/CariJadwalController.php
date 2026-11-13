@@ -28,6 +28,8 @@ class CariJadwalController extends Controller
 
         if ($request->filled('tanggal')) {
             $query->whereDate('tanggal_berangkat', $request->tanggal);
+        } else {
+            $query->whereDate('tanggal_berangkat', '>=', now()->toDateString());
         }
 
         $hasilJadwal = $query->orderBy('tanggal_berangkat')->orderBy('jam_berangkat')->get();

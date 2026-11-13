@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\KeluarController;
 use App\Http\Controllers\Auth\MasukController;
 use App\Http\Controllers\Member;
 use App\Http\Controllers\Operator;
+use App\Http\Controllers\PembayaranBuktiController;
 use App\Http\Controllers\Publik;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,10 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/keluar', [KeluarController::class, 'destroy'])->name('keluar');
     Route::post('/logout', [KeluarController::class, 'destroy'])->name('logout');
+
+    // Berkas Bukti Pembayaran (Akses Terotorisasi & Streaming Aman)
+    Route::get('/pembayaran/bukti/{konfirmasi}', [PembayaranBuktiController::class, 'show'])->name('pembayaran.bukti');
+    Route::get('/pembayaran/bukti/riwayat/{riwayat}', [PembayaranBuktiController::class, 'showRiwayat'])->name('pembayaran.bukti.riwayat');
 });
 
 /*

@@ -6,6 +6,7 @@ use Database\Factories\KonfirmasiPembayaranFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class KonfirmasiPembayaran extends Model
 {
@@ -66,6 +67,16 @@ class KonfirmasiPembayaran extends Model
      */
     public function verifikator(): BelongsTo
     {
-        return $this->belongsTo(Pengguna::class, 'diverifikasi_oleh');
+        return $this->belongsTo(Pengguna::class, 'diverifikasi_oleh')->withTrashed();
+    }
+
+    /**
+     * Relasi ke entri riwayat pembayaran.
+     *
+     * @return HasMany<RiwayatPembayaran, $this>
+     */
+    public function riwayat(): HasMany
+    {
+        return $this->hasMany(RiwayatPembayaran::class, 'konfirmasi_pembayaran_id')->latest();
     }
 }

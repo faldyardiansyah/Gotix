@@ -87,7 +87,7 @@
                                 </div>
                                 @if ($pesanan->konfirmasiPembayaran)
                                     <div class="text-[11px] text-emerald-600 font-medium">
-                                        a.n {{ $pesanan->konfirmasiPembayaran->nama_pengirim }}
+                                        {{ $pesanan->konfirmasiPembayaran->rekening_pengirim }}
                                     </div>
                                 @else
                                     <div class="text-[11px] text-slate-400">Belum ada struk</div>

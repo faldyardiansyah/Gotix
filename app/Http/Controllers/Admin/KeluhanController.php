@@ -27,8 +27,11 @@ class KeluhanController extends Controller
 
     public function balas(Request $request, string $id): RedirectResponse
     {
+        $minBalasan = (int) config('gotix.keluhan.balasan_min', 3);
+        $maxBalasan = (int) config('gotix.keluhan.balasan_max', 1000);
+
         $request->validate([
-            'balasan' => ['required', 'string', 'min:3', 'max:1000'],
+            'balasan' => ['required', 'string', "min:{$minBalasan}", "max:{$maxBalasan}"],
         ]);
 
         $keluhan = Keluhan::findOrFail($id);

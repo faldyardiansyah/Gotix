@@ -1,1 +1,1 @@
-<h1>[PLACEHOLDER] Operator — Pesanan Loket</h1>
+<script>window.location.href = "{{ route('operator.loket.index') }}";</script>

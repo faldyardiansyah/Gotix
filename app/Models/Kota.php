@@ -6,11 +6,12 @@ use Database\Factories\KotaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Kota extends Model
 {
     /** @use HasFactory<KotaFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * Nama tabel terkait dengan model.

@@ -31,6 +31,9 @@ class Pesanan extends Model
         'kode_pesanan',
         'jadwal_id',
         'pengguna_id',
+        'nama_penumpang',
+        'telepon_penumpang',
+        'dibuat_oleh_operator_id',
         'nomor_kursi',
         'harga_snapshot',
         'status',
@@ -46,6 +49,7 @@ class Pesanan extends Model
     {
         return [
             'nomor_kursi' => 'integer',
+            'kursi_aktif' => 'integer',
             'harga_snapshot' => 'integer',
             'status' => StatusPesanan::class,
             'batas_bayar' => 'datetime',
@@ -59,7 +63,7 @@ class Pesanan extends Model
      */
     public function jadwal(): BelongsTo
     {
-        return $this->belongsTo(Jadwal::class, 'jadwal_id');
+        return $this->belongsTo(Jadwal::class, 'jadwal_id')->withTrashed();
     }
 
     /**
@@ -69,7 +73,17 @@ class Pesanan extends Model
      */
     public function pengguna(): BelongsTo
     {
-        return $this->belongsTo(Pengguna::class, 'pengguna_id');
+        return $this->belongsTo(Pengguna::class, 'pengguna_id')->withTrashed();
+    }
+
+    /**
+     * Relasi ke operator pembuat pesanan loket.
+     *
+     * @return BelongsTo<Pengguna, $this>
+     */
+    public function operatorLoket(): BelongsTo
+    {
+        return $this->belongsTo(Pengguna::class, 'dibuat_oleh_operator_id')->withTrashed();
     }
 
     /**
@@ -80,6 +94,16 @@ class Pesanan extends Model
     public function konfirmasiPembayaran(): HasOne
     {
         return $this->hasOne(KonfirmasiPembayaran::class, 'pesanan_id');
+    }
+
+    /**
+     * Relasi ke riwayat bukti pembayaran pesanan.
+     *
+     * @return HasMany<RiwayatPembayaran, $this>
+     */
+    public function riwayatPembayaran(): HasMany
+    {
+        return $this->hasMany(RiwayatPembayaran::class, 'pesanan_id')->latest();
     }
 
     /**

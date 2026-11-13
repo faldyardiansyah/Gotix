@@ -5,55 +5,77 @@
 @section('konten')
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12"
      x-data="{
-        pesan: '',
-        maksKarakter: 200,
+        pesan: '{{ old('deskripsi', '') }}',
+        maksKarakter: {{ (int) config('gotix.keluhan.deskripsi_max', 1000) }},
         get sisa() {
             return this.maksKarakter - this.pesan.length;
         }
      }">
 
     <!-- Tombol Kembali -->
-    <div class="mb-6 flex items-center justify-between" data-aos="fade-down" data-aos-duration="400">
+    <div class="mb-6 flex items-center justify-between">
         <a href="{{ route('member.keluhan.index') }}"
-           class="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+           class="inline-flex items-center gap-2 text-xs font-heading font-bold text-slate-700 hover:text-slate-950 px-3.5 py-1.5 rounded-full border-2 border-slate-900 bg-white shadow-[2px_2px_0px_#18181b] transition">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
             </svg>
             <span>Kembali ke Daftar Keluhan</span>
         </a>
     </div>
 
-    <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6" data-aos="fade-up" data-aos-duration="500">
+    <div class="bg-white border-2 border-slate-900 rounded-2xl p-6 sm:p-8 shadow-[5px_5px_0px_#18181b] space-y-6">
         <!-- Header Form -->
-        <div class="pb-5 border-b border-slate-100">
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-sky-50 border border-sky-200/60 text-sky-700 text-xs font-semibold mb-2">
-                <span class="w-1.5 h-1.5 rounded-full bg-sky-600"></span>
-                Formulir Aspirasi Penumpang
+        <div class="pb-5 border-b-2 border-slate-900">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 border-2 border-slate-900 text-slate-950 font-heading text-xs font-black shadow-[2px_2px_0px_#18181b] mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                <span>Formulir Aspirasi Penumpang</span>
             </div>
-            <h1 class="font-heading text-2xl font-extrabold text-slate-900">Ajukan Keluhan Perjalanan</h1>
-            <p class="text-xs text-slate-600 mt-1">
-                Kritik dan saran Anda sangat berharga untuk peningkatan mutu armada dan ketepatan layanan Gotix.
+            <h1 class="font-heading text-2xl font-black text-slate-900">Ajukan Keluhan Perjalanan</h1>
+            <p class="text-xs text-slate-600 mt-1 font-medium">
+                Kritik dan masukan Anda sangat berharga untuk peningkatan mutu armada dan ketepatan layanan Gotix.
             </p>
         </div>
 
-        <form action="#" method="POST" class="space-y-5" onsubmit="event.preventDefault(); alert('Keluhan Anda telah berhasil dikirim. Tim Customer Service Gotix akan segera menindaklanjuti.'); window.location.href='{{ route('member.keluhan.index') }}';">
+        @if ($errors->any())
+            <div class="p-4 rounded-2xl bg-rose-100 border-2 border-slate-900 text-xs text-rose-950 space-y-1 font-bold shadow-[3px_3px_0px_#18181b]">
+                <div class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                    </svg>
+                    <span>Mohon Periksa Kolom Input:</span>
+                </div>
+                <ul class="list-disc list-inside space-y-0.5 text-rose-900 font-medium">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('member.keluhan.store') }}" method="POST" class="space-y-5">
             @csrf
 
             <!-- Pilih Kode Tiket / Pesanan -->
             <div>
-                <label for="pesanan_id" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label for="pesanan_id" class="block font-heading font-bold text-xs uppercase tracking-wider text-slate-900 mb-1.5">
                     Tiket / Pesanan Terkait (Opsional)
                 </label>
                 <div class="relative">
                     <select name="pesanan_id" id="pesanan_id"
-                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition appearance-none cursor-pointer">
+                            class="w-full bg-white border-2 border-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 shadow-[2px_2px_0px_#18181b] focus:outline-none focus:border-amber-500 focus:shadow-[3px_3px_0px_#f59e0b] transition appearance-none cursor-pointer">
                         <option value="">-- Pilih Tiket Perjalanan Terkait (Bila Ada) --</option>
-                        <option value="GTX-JKTBDG">GTX-JKTBDG — Jakarta → Bandung ({{ date('d M Y', strtotime('+2 days')) }})</option>
-                        <option value="GTX-YOGSUB">GTX-YOGSUB — Yogyakarta → Surabaya ({{ date('d M Y', strtotime('+5 days')) }})</option>
-                        <option value="GTX-321550">GTX-321550 — Medan → Pekanbaru ({{ date('d M Y', strtotime('+1 day')) }})</option>
+                        @foreach ($daftarPesanan as $pesanan)
+                            @php
+                                $rute = ($pesanan->jadwal?->kotaAsal?->nama_kota ?? 'Asal') . ' → ' . ($pesanan->jadwal?->kotaTujuan?->nama_kota ?? 'Tujuan');
+                                $tgl = $pesanan->jadwal?->waktu_berangkat ? \Carbon\Carbon::parse($pesanan->jadwal->waktu_berangkat)->format('d M Y') : '-';
+                            @endphp
+                            <option value="{{ $pesanan->id }}" {{ old('pesanan_id') == $pesanan->id ? 'selected' : '' }}>
+                                {{ $pesanan->kode_pesanan }} — {{ $rute }} (Kursi #{{ $pesanan->nomor_kursi }}, {{ $tgl }})
+                            </option>
+                        @endforeach
                     </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-900">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                         </svg>
                     </div>
@@ -62,53 +84,55 @@
 
             <!-- Kategori Masalah -->
             <div>
-                <label for="kategori" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
-                    Kategori Masalah
+                <label for="kategori" class="block font-heading font-bold text-xs uppercase tracking-wider text-slate-900 mb-1.5">
+                    Kategori Masalah <span class="text-rose-600 font-black">*</span>
                 </label>
                 <div class="relative">
                     <select name="kategori" id="kategori" required
-                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition appearance-none cursor-pointer">
-                        <option value="" disabled selected>Pilih kategori keluhan</option>
-                        <option value="Pelayanan">Pelayanan (Kru / Pengemudi / Sopir)</option>
-                        <option value="Armada">Kondisi Armada (AC, Kebersihan, Bagasi)</option>
-                        <option value="Pembayaran">Pembayaran & Konfirmasi Transfer</option>
-                        <option value="Akun">Akun & Kendala Profil Member</option>
-                        <option value="Lainnya">Lainnya</option>
+                            class="w-full bg-white border-2 border-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 shadow-[2px_2px_0px_#18181b] focus:outline-none focus:border-amber-500 focus:shadow-[3px_3px_0px_#f59e0b] transition appearance-none cursor-pointer">
+                        <option value="" disabled {{ old('kategori') ? '' : 'selected' }}>Pilih kategori keluhan</option>
+                        @foreach ($kategori as $kat)
+                            @php
+                                $val = $kat instanceof \App\Enums\KategoriKeluhan ? $kat->value : (string) $kat;
+                            @endphp
+                            <option value="{{ $val }}" {{ old('kategori') == $val ? 'selected' : '' }}>
+                                {{ $val }}
+                            </option>
+                        @endforeach
                     </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-900">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                         </svg>
                     </div>
                 </div>
             </div>
 
-            <!-- Deskripsi Detail Masalah (Max 200 Karakter) -->
+            <!-- Deskripsi Detail Masalah (Max 1000 Karakter) -->
             <div>
                 <div class="flex items-center justify-between mb-1.5">
-                    <label for="deskripsi" class="block text-xs font-semibold uppercase tracking-wider text-slate-700">
-                        Rincian Detail Keluhan
+                    <label for="deskripsi" class="block font-heading font-bold text-xs uppercase tracking-wider text-slate-900">
+                        Rincian Detail Keluhan <span class="text-rose-600 font-black">*</span>
                     </label>
-                    <span class="text-[11px] font-mono" :class="sisa < 20 ? 'text-rose-600 font-bold' : 'text-slate-400'">
+                    <span class="text-[11px] font-mono font-bold" :class="sisa < 50 ? 'text-rose-600' : 'text-slate-500'">
                         Sisa <span x-text="sisa"></span> karakter
                     </span>
                 </div>
-                <textarea name="deskripsi" id="deskripsi" rows="4" required
-                          maxlength="200"
+                <textarea name="deskripsi" id="deskripsi" rows="5" required
+                          minlength="{{ (int) config('gotix.keluhan.deskripsi_min', 10) }}"
+                          maxlength="{{ (int) config('gotix.keluhan.deskripsi_max', 1000) }}"
                           x-model="pesan"
-                          placeholder="Jelaskan secara singkat kendala yang Anda alami (maksimal 200 karakter)..."
-                          class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition leading-relaxed"></textarea>
+                          placeholder="Jelaskan secara rinci kendala yang Anda alami (antara 10 s/d 1.000 karakter)..."
+                          class="w-full bg-white border-2 border-slate-900 rounded-xl px-3.5 py-3 text-xs font-medium text-slate-900 shadow-[2px_2px_0px_#18181b] focus:outline-none focus:border-amber-500 focus:shadow-[3px_3px_0px_#f59e0b] transition leading-relaxed"></textarea>
             </div>
 
             <div class="pt-2 flex items-center justify-end gap-3">
-                <a href="{{ route('member.keluhan.index') }}"
-                   class="px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition">
+                <x-button href="{{ route('member.keluhan.index') }}" variant="secondary" size="md">
                     Batalkan
-                </a>
-                <button type="submit"
-                        class="px-6 py-2.5 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 active:bg-sky-800 rounded-xl transition shadow-sm cursor-pointer">
+                </x-button>
+                <x-button type="submit" variant="primary" size="md">
                     Kirim Laporan Keluhan
-                </button>
+                </x-button>
             </div>
         </form>
     </div>

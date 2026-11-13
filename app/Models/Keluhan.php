@@ -55,7 +55,7 @@ class Keluhan extends Model
      */
     public function pengguna(): BelongsTo
     {
-        return $this->belongsTo(Pengguna::class, 'pengguna_id');
+        return $this->belongsTo(Pengguna::class, 'pengguna_id')->withTrashed();
     }
 
     /**
@@ -75,6 +75,6 @@ class Keluhan extends Model
      */
     public function petugasBalas(): BelongsTo
     {
-        return $this->belongsTo(Pengguna::class, 'dibalas_oleh');
+        return $this->belongsTo(Pengguna::class, 'dibalas_oleh')->withTrashed();
     }
 }

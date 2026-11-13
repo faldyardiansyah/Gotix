@@ -7,13 +7,14 @@ use App\Enums\PeranPengguna;
 use Database\Factories\PenggunaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class Pengguna extends Authenticatable
 {
     /** @use HasFactory<PenggunaFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * Nama tabel terkait dengan model.
@@ -70,6 +71,16 @@ class Pengguna extends Authenticatable
     public function pesanan(): HasMany
     {
         return $this->hasMany(Pesanan::class, 'pengguna_id');
+    }
+
+    /**
+     * Relasi ke pesanan loket yang dibuat oleh operator ini.
+     *
+     * @return HasMany<Pesanan, $this>
+     */
+    public function pesananLoketDibuat(): HasMany
+    {
+        return $this->hasMany(Pesanan::class, 'dibuat_oleh_operator_id');
     }
 
     /**

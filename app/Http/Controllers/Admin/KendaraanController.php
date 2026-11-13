@@ -28,8 +28,8 @@ class KendaraanController extends Controller
     {
         $validated = $request->validate([
             'jenis_kendaraan' => ['required', 'string', 'max:100'],
-            'nomor_polisi'    => ['required', 'string', 'max:20', 'unique:kendaraan,nomor_polisi'],
-            'warna'           => ['required', 'string', 'max:50'],
+            'nomor_polisi' => ['required', 'string', 'max:20', 'unique:kendaraan,nomor_polisi'],
+            'warna' => ['required', 'string', 'max:50'],
             'kapasitas_kursi' => ['required', 'integer', 'min:1', 'max:50'],
         ]);
 
@@ -52,8 +52,8 @@ class KendaraanController extends Controller
 
         $validated = $request->validate([
             'jenis_kendaraan' => ['required', 'string', 'max:100'],
-            'nomor_polisi'    => ['required', 'string', 'max:20', 'unique:kendaraan,nomor_polisi,' . $id],
-            'warna'           => ['required', 'string', 'max:50'],
+            'nomor_polisi' => ['required', 'string', 'max:20', 'unique:kendaraan,nomor_polisi,'.$id],
+            'warna' => ['required', 'string', 'max:50'],
             'kapasitas_kursi' => ['required', 'integer', 'min:1', 'max:50'],
         ]);
 
@@ -66,9 +66,31 @@ class KendaraanController extends Controller
     public function destroy(string $id): RedirectResponse
     {
         $kendaraan = Kendaraan::findOrFail($id);
+
+        $now = now();
+        $today = $now->toDateString();
+        $currentTime = $now->toTimeString();
+
+        // Cek apakah armada masih ditugaskan pada jadwal operasional masa depan
+        $hasOperationalSchedule = $kendaraan->jadwal()
+            ->where(function ($q) use ($today, $currentTime) {
+                $q->whereDate('tanggal_berangkat', '>', $today)
+                    ->orWhere(function ($sub) use ($today, $currentTime) {
+                        $sub->whereDate('tanggal_berangkat', $today)
+                            ->where('jam_berangkat', '>=', $currentTime);
+                    });
+            })
+            ->exists();
+
+        if ($hasOperationalSchedule) {
+            return back()->withErrors([
+                'error' => 'Kendaraan dengan nomor polisi '.$kendaraan->nomor_polisi.' tidak dapat dinonaktifkan karena masih ditugaskan pada jadwal keberangkatan aktif masa depan.',
+            ]);
+        }
+
         $kendaraan->delete();
 
         return redirect()->route('admin.kendaraan.index')
-            ->with('sukses', 'Kendaraan berhasil dihapus.');
+            ->with('sukses', 'Kendaraan '.$kendaraan->nomor_polisi.' berhasil dihapus.');
     }
 }

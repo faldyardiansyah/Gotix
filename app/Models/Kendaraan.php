@@ -6,11 +6,12 @@ use Database\Factories\KendaraanFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Kendaraan extends Model
 {
     /** @use HasFactory<KendaraanFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * Nama tabel terkait dengan model.

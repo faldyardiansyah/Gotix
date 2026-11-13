@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Jadwal;
 use App\Models\Kota;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -48,7 +49,7 @@ class KotaController extends Controller
         $kota = Kota::findOrFail($id);
 
         $validated = $request->validate([
-            'nama_kota' => ['required', 'string', 'max:100', 'unique:kota,nama_kota,' . $id],
+            'nama_kota' => ['required', 'string', 'max:100', 'unique:kota,nama_kota,'.$id],
         ]);
 
         $kota->update($validated);
@@ -60,9 +61,34 @@ class KotaController extends Controller
     public function destroy(string $id): RedirectResponse
     {
         $kota = Kota::findOrFail($id);
+
+        $now = now();
+        $today = $now->toDateString();
+        $currentTime = $now->toTimeString();
+
+        // Cek apakah kota masih terdaftar pada jadwal operasional masa depan (sebagai kota asal atau tujuan)
+        $hasOperationalSchedule = Jadwal::where(function ($q) use ($kota) {
+            $q->where('kota_asal_id', $kota->id)
+                ->orWhere('kota_tujuan_id', $kota->id);
+        })
+            ->where(function ($q) use ($today, $currentTime) {
+                $q->whereDate('tanggal_berangkat', '>', $today)
+                    ->orWhere(function ($sub) use ($today, $currentTime) {
+                        $sub->whereDate('tanggal_berangkat', $today)
+                            ->where('jam_berangkat', '>=', $currentTime);
+                    });
+            })
+            ->exists();
+
+        if ($hasOperationalSchedule) {
+            return back()->withErrors([
+                'error' => 'Kota '.$kota->nama_kota.' tidak dapat dinonaktifkan karena masih terdaftar pada jadwal keberangkatan aktif masa depan.',
+            ]);
+        }
+
         $kota->delete();
 
         return redirect()->route('admin.kota.index')
-            ->with('sukses', 'Kota berhasil dihapus.');
+            ->with('sukses', 'Kota '.$kota->nama_kota.' berhasil dihapus.');
     }
 }

@@ -3,99 +3,149 @@
 @section('title', 'Kasir Pemesanan Loket (Walk-in) — Operator Gotix')
 
 @section('konten')
+@php
+    $jadwalJs = $jadwalAktif->map(function ($j) {
+        $terisi = $j->pesanan
+            ->filter(fn($p) => in_array($p->status->value, ['Belum Bayar', 'Dalam Proses', 'Lunas']))
+            ->pluck('nomor_kursi')
+            ->values()
+            ->all();
+
+        return [
+            'id' => $j->id,
+            'asal' => $j->kotaAsal->nama_kota ?? 'Kota Asal',
+            'tujuan' => $j->kotaTujuan->nama_kota ?? 'Kota Tujuan',
+            'tanggal' => $j->tanggal_berangkat ? $j->tanggal_berangkat->format('d M Y') : '-',
+            'jam' => $j->jam_berangkat ? substr((string) $j->jam_berangkat, 0, 5) . ' WIB' : '-',
+            'harga' => (int) $j->harga,
+            'armada' => ($j->kendaraan->jenis_kendaraan ?? 'Travel') . ' (' . ($j->kendaraan->nomor_polisi ?? '-') . ')',
+            'kapasitas' => (int) ($j->kendaraan->kapasitas_kursi ?? config('gotix.kapasitas_kursi', 5)),
+            'kursi_terisi' => $terisi,
+        ];
+    });
+
+    $defaultJadwalId = $jadwalJs->first()['id'] ?? 0;
+@endphp
+
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12"
      x-data="{
-        ruteTerpilih: 'jkt-bdg',
-        tarifRute: 120000,
-        kursiTerpilih: 3,
-        kursiTerisi: [1, 5], // Kursi 1 dan 5 sudah terisi penumpang lain
-        namaPenumpang: '',
-        teleponPenumpang: '',
-        jenisKelamin: 'L',
-        metodeBayar: 'tunai',
-        uangDiterima: 150000,
-        modalCetak: false,
-        kodeTiketInstan: 'GTX-LOKET' + Math.floor(1000 + Math.random() * 9000),
+        jadwalList: @js($jadwalJs),
+        jadwalId: {{ $defaultJadwalId }},
+        kursiTerpilih: null,
 
-        gantiRute(event) {
-            let val = event.target.value;
-            this.ruteTerpilih = val;
-            if (val === 'jkt-bdg') {
-                this.tarifRute = 120000;
-                this.kursiTerisi = [1, 5];
-            } else if (val === 'yog-sub') {
-                this.tarifRute = 180000;
-                this.kursiTerisi = [2, 4];
-            } else if (val === 'smg-mlg') {
-                this.tarifRute = 195000;
-                this.kursiTerisi = [1, 2, 3];
-            } else if (val === 'med-pku') {
-                this.tarifRute = 240000;
-                this.kursiTerisi = [4];
-            }
-            if (this.kursiTerisi.includes(this.kursiTerpilih)) {
-                this.kursiTerpilih = null;
-            }
+        get currentJadwal() {
+            return this.jadwalList.find(j => j.id == this.jadwalId) || null;
+        },
+
+        get kapasitas() {
+            return this.currentJadwal ? this.currentJadwal.kapasitas : 5;
+        },
+
+        get kursiTerisi() {
+            return this.currentJadwal ? this.currentJadwal.kursi_terisi : [];
+        },
+
+        get tarif() {
+            return this.currentJadwal ? this.currentJadwal.harga : 0;
         },
 
         pilihKursi(no) {
             if (this.kursiTerisi.includes(no)) {
-                alert('Kursi #' + no + ' sudah dipesan oleh penumpang lain. Silakan pilih nomor kursi yang kosong.');
                 return;
             }
             this.kursiTerpilih = no;
         },
 
-        submitLoket() {
-            if (!this.kursiTerpilih) {
-                alert('Harap pilih nomor kursi pada denah visual armada terlebih dahulu.');
-                return;
-            }
-            if (!this.namaPenumpang.trim() || !this.teleponPenumpang.trim()) {
-                alert('Harap lengkapi nama dan nomor telepon penumpang.');
-                return;
-            }
-            this.modalCetak = true;
+        formatRupiah(num) {
+            return 'Rp ' + Number(num).toLocaleString('id-ID');
         }
      }">
 
     @include('operator._nav', [
         'judul' => 'Kasir Loket & Penumpang Walk-in',
-        'deskripsi' => 'Layanan reservasi langsung di konter loket stasiun/terminal untuk penumpang tanpa aplikasi.'
+        'deskripsi' => 'Layanan reservasi langsung di konter loket stasiun/terminal untuk penumpang tiket antar kota.'
     ])
 
-    <form @submit.prevent="submitLoket()" class="space-y-8" data-aos="fade-up" data-aos-duration="500">
-        <!-- Grid 2 Kolom: Pilihan Rute & Denah Kursi -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Kolom Kiri: Rute & Denah Visual Kursi -->
-            <div class="lg:col-span-7 space-y-6">
-                <!-- Box Pilihan Jadwal & Rute -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
-                    <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-                        <div class="w-8 h-8 rounded-lg bg-sky-50 border border-sky-200/80 flex items-center justify-center text-sky-600">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h2 class="font-heading font-bold text-slate-900 text-sm">Pilih Trayek & Jadwal Armada</h2>
-                            <div class="text-[11px] text-slate-500">Rute travel antar kota se-Indonesia</div>
-                        </div>
-                    </div>
+    @if (session('sukses'))
+        <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2" data-aos="fade-down">
+            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            <span class="font-bold">{{ session('sukses') }}</span>
+        </div>
+    @endif
 
-                    <div class="space-y-3">
+    @if ($errors->any())
+        <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-xs text-rose-800 space-y-1">
+            <div class="font-bold flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                </svg>
+                Kendala Validasi Transaksi Loket:
+            </div>
+            <ul class="list-disc list-inside space-y-0.5 text-rose-700">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @if ($jadwalAktif->isEmpty())
+        <div class="text-center py-16 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+            <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+            </div>
+            <h3 class="font-heading font-bold text-slate-900 text-lg">Tidak Ada Jadwal Keberangkatan Aktif</h3>
+            <p class="text-xs text-slate-500 mt-1">Saat ini belum ada jadwal perjalanan masa mendatang yang siap dipesan.</p>
+        </div>
+    @else
+        <form action="{{ route('operator.loket.store') }}" method="POST" class="space-y-8" data-aos="fade-up" data-aos-duration="500">
+            @csrf
+
+            <!-- Hidden Input Kursi Terpilih -->
+            <input type="hidden" name="nomor_kursi" :value="kursiTerpilih" required>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Kolom Kiri: Pilihan Jadwal & Denah Kursi Real -->
+                <div class="lg:col-span-7 space-y-6">
+                    <!-- Box Pilihan Trayek -->
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+                        <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+                            <div class="w-8 h-8 rounded-lg bg-sky-50 border border-sky-200/80 flex items-center justify-center text-sky-600">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="font-heading font-bold text-slate-900 text-sm">Pilih Trayek & Jadwal Keberangkatan</h2>
+                                <div class="text-[11px] text-slate-500">Jadwal armada aktif dari basis data operasional Gotix</div>
+                            </div>
+                        </div>
+
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                            <label for="jadwal_id" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
                                 Trayek Rute Keberangkatan
                             </label>
                             <div class="relative">
-                                <select @change="gantiRute($event)"
+                                <select name="jadwal_id" id="jadwal_id" required
+                                        x-model="jadwalId"
+                                        @change="kursiTerpilih = null"
                                         class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition appearance-none cursor-pointer">
-                                    <option value="jkt-bdg">Jakarta (Gambir) → Bandung (Dipatiukur) — Rp 120.000</option>
-                                    <option value="yog-sub">Yogyakarta (Malioboro) → Surabaya (Gubeng) — Rp 180.000</option>
-                                    <option value="smg-mlg">Semarang (Simpang Lima) → Malang (Arjosari) — Rp 195.000</option>
-                                    <option value="med-pku">Medan (Amplas) → Pekanbaru (Arengka) — Rp 240.000</option>
+                                    @foreach ($jadwalAktif as $jadwal)
+                                        @php
+                                            $ruteStr = ($jadwal->kotaAsal->nama_kota ?? '-') . ' → ' . ($jadwal->kotaTujuan->nama_kota ?? '-');
+                                            $tglStr = $jadwal->tanggal_berangkat ? $jadwal->tanggal_berangkat->format('d M Y') : '-';
+                                            $jamStr = $jadwal->jam_berangkat ? substr((string) $jadwal->jam_berangkat, 0, 5) : '-';
+                                            $hrgStr = 'Rp ' . number_format($jadwal->harga, 0, ',', '.');
+                                        @endphp
+                                        <option value="{{ $jadwal->id }}" {{ old('jadwal_id', $defaultJadwalId) == $jadwal->id ? 'selected' : '' }}>
+                                            {{ $ruteStr }} ({{ $tglStr }} {{ $jamStr }} WIB) — {{ $hrgStr }}
+                                        </option>
+                                    @endforeach
                                 </select>
                                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -105,275 +155,204 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
-                                    Tanggal Berangkat
-                                </label>
-                                <input type="date" value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}"
-                                       class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <template x-if="currentJadwal">
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 flex items-center justify-between">
+                                <div>
+                                    <span class="font-bold text-slate-900" x-text="currentJadwal.armada"></span>
+                                    <div class="text-[11px] text-slate-500" x-text="'Keberangkatan: ' + currentJadwal.tanggal + ' ' + currentJadwal.jam"></div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-extrabold text-sky-600" x-text="formatRupiah(currentJadwal.harga)"></div>
+                                    <div class="text-[10px] text-slate-400" x-text="'Kapasitas ' + currentJadwal.kapasitas + ' Seat'"></div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Denah Kursi Real -->
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <h2 class="font-heading font-bold text-slate-900 text-sm">Pilih Nomor Kursi</h2>
+                            <div class="flex items-center gap-3 text-xs">
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-md bg-sky-600"></span> Dipilih</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-md bg-slate-100 border border-slate-300"></span> Kosong</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-md bg-rose-100 text-rose-500 border border-rose-200"></span> Terisi</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-5 gap-3 pt-2">
+                            <template x-for="seatNo in Array.from({length: kapasitas}, (_, i) => i + 1)" :key="seatNo">
+                                <button type="button"
+                                        @click="pilihKursi(seatNo)"
+                                        :disabled="kursiTerisi.includes(seatNo)"
+                                        :class="{
+                                            'bg-rose-50 border-rose-200 text-rose-400 cursor-not-allowed': kursiTerisi.includes(seatNo),
+                                            'bg-sky-600 text-white border-sky-600 shadow-sm ring-2 ring-sky-300': kursiTerpilih === seatNo,
+                                            'bg-slate-50 border-slate-200 text-slate-700 hover:border-sky-400 hover:bg-sky-50/50': !kursiTerisi.includes(seatNo) && kursiTerpilih !== seatNo
+                                        }"
+                                        class="border rounded-2xl p-3 text-center transition flex flex-col items-center justify-center cursor-pointer">
+                                    <span class="text-[10px] uppercase font-semibold">Seat</span>
+                                    <span class="font-heading text-lg font-extrabold" x-text="seatNo"></span>
+                                    <span class="text-[9px]" x-text="kursiTerisi.includes(seatNo) ? 'Terisi' : (kursiTerpilih === seatNo ? 'Dipilih' : 'Kosong')"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kolom Kanan: Identitas Penumpang & Pembayaran Loket -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
+                        <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+                            <div class="w-8 h-8 rounded-lg bg-sky-50 border border-sky-200/80 flex items-center justify-center text-sky-600">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                </svg>
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
-                                    Jam Operasional
+                                <h2 class="font-heading font-bold text-slate-900 text-sm">Akun / Identitas Penumpang</h2>
+                                <div class="text-[11px] text-slate-500">Pilih akun member pelanggan loket</div>
+                            </div>
+                        </div>
+
+                        <div x-data="{ tipePenumpang: '{{ old('tipe_penumpang', 'walkin') }}' }">
+                            <div class="flex items-center gap-2 mb-3">
+                                <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 cursor-pointer">
+                                    <input type="radio" name="tipe_penumpang" value="walkin" x-model="tipePenumpang" class="text-sky-600 focus:ring-sky-500">
+                                    <span>Walk-in (Non-Member)</span>
                                 </label>
-                                <input type="text" value="08:30 WIB (Pagi)" readonly
-                                       class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 font-semibold cursor-not-allowed">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Box Denah Visual Pemilihan Kursi (Kapasitas 5 Eksklusif) -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                        <div>
-                            <h2 class="font-heading font-bold text-slate-900 text-sm">Denah Kursi Armada (Kapasitas 5)</h2>
-                            <p class="text-[11px] text-slate-500">Pilih salah satu kursi yang masih berstatus kosong</p>
-                        </div>
-                        <span class="text-xs font-mono font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200">
-                            Terpilih: Kursi #<span x-text="kursiTerpilih || 'Belum dipilih'"></span>
-                        </span>
-                    </div>
-
-                    <!-- Layout Denah Kabin Mini Travel -->
-                    <div class="p-6 bg-slate-900 rounded-2xl border border-slate-800 text-white max-w-sm mx-auto">
-                        <!-- Depan: Pengemudi & Kursi 1 -->
-                        <div class="text-[10px] uppercase font-semibold text-slate-400 text-center mb-4 tracking-wider">
-                            Depan (Area Kemudi Sopir)
-                        </div>
-
-                        <!-- Baris 1: Sopir + Kursi Depan (Seat 1) -->
-                        <div class="grid grid-cols-2 gap-4 pb-4 border-b border-slate-800">
-                            <div class="h-16 rounded-xl bg-slate-800 border border-slate-700 flex flex-col items-center justify-center text-slate-400">
-                                <span class="text-xs font-bold">KEMUDI</span>
-                                <span class="text-[10px] text-slate-500">Sopir Gotix</span>
+                                <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 cursor-pointer ml-3">
+                                    <input type="radio" name="tipe_penumpang" value="member" x-model="tipePenumpang" class="text-sky-600 focus:ring-sky-500">
+                                    <span>Member Terdaftar</span>
+                                </label>
                             </div>
 
-                            <button type="button"
-                                    @click="pilihKursi(1)"
-                                    :class="kursiTerisi.includes(1) ? 'bg-rose-950/60 border-rose-800 text-rose-300 cursor-not-allowed' : (kursiTerpilih === 1 ? 'bg-sky-600 border-sky-400 text-white ring-2 ring-sky-300' : 'bg-slate-800 border-slate-700 hover:border-sky-500 text-slate-200 cursor-pointer')"
-                                    class="h-16 rounded-xl border flex flex-col items-center justify-center transition shadow-xs">
-                                <span class="font-heading font-bold text-base">Seat 01</span>
-                                <span class="text-[10px]" x-text="kursiTerisi.includes(1) ? 'Terisi' : (kursiTerpilih === 1 ? 'Dipilih' : 'Kosong')"></span>
-                            </button>
+                            <!-- Input Walk-in Non-Member -->
+                            <div x-show="tipePenumpang === 'walkin'" class="space-y-3">
+                                <div>
+                                    <label for="nama_penumpang" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+                                        Nama Lengkap Penumpang <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input type="text" name="nama_penumpang" id="nama_penumpang" value="{{ old('nama_penumpang') }}" placeholder="Contoh: Ahmad Fauzi"
+                                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition">
+                                </div>
+                                <div>
+                                    <label for="telepon_penumpang" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+                                        Nomor Telepon / WhatsApp <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input type="text" name="telepon_penumpang" id="telepon_penumpang" value="{{ old('telepon_penumpang') }}" placeholder="Contoh: 081234567890"
+                                           class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition">
+                                </div>
+                            </div>
+
+                            <!-- Input Member Terdaftar -->
+                            <div x-show="tipePenumpang === 'member'">
+                                <label for="pengguna_id" class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                                    Pilih Akun Member
+                                </label>
+                                <div class="relative">
+                                    <select name="pengguna_id" id="pengguna_id"
+                                            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition appearance-none cursor-pointer">
+                                        <option value="" {{ old('pengguna_id') ? '' : 'selected' }}>Pilih pelanggan member</option>
+                                        @foreach ($daftarMember as $member)
+                                            <option value="{{ $member->id }}" {{ old('pengguna_id') == $member->id ? 'selected' : '' }}>
+                                                {{ $member->nama }} ({{ $member->telepon ?? $member->username }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Baris 2: Kursi Tengah (Seat 2 & 3) -->
-                        <div class="grid grid-cols-2 gap-4 py-4 border-b border-slate-800">
-                            <button type="button"
-                                    @click="pilihKursi(2)"
-                                    :class="kursiTerisi.includes(2) ? 'bg-rose-950/60 border-rose-800 text-rose-300 cursor-not-allowed' : (kursiTerpilih === 2 ? 'bg-sky-600 border-sky-400 text-white ring-2 ring-sky-300' : 'bg-slate-800 border-slate-700 hover:border-sky-500 text-slate-200 cursor-pointer')"
-                                    class="h-16 rounded-xl border flex flex-col items-center justify-center transition shadow-xs">
-                                <span class="font-heading font-bold text-base">Seat 02</span>
-                                <span class="text-[10px]" x-text="kursiTerisi.includes(2) ? 'Terisi' : (kursiTerpilih === 2 ? 'Dipilih' : 'Kosong')"></span>
-                            </button>
-
-                            <button type="button"
-                                    @click="pilihKursi(3)"
-                                    :class="kursiTerisi.includes(3) ? 'bg-rose-950/60 border-rose-800 text-rose-300 cursor-not-allowed' : (kursiTerpilih === 3 ? 'bg-sky-600 border-sky-400 text-white ring-2 ring-sky-300' : 'bg-slate-800 border-slate-700 hover:border-sky-500 text-slate-200 cursor-pointer')"
-                                    class="h-16 rounded-xl border flex flex-col items-center justify-center transition shadow-xs">
-                                <span class="font-heading font-bold text-base">Seat 03</span>
-                                <span class="text-[10px]" x-text="kursiTerisi.includes(3) ? 'Terisi' : (kursiTerpilih === 3 ? 'Dipilih' : 'Kosong')"></span>
-                            </button>
+                        <!-- Ringkasan Tarif & Konfirmasi Bayar Tunai -->
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 pt-4">
+                            <div class="flex items-center justify-between text-xs text-slate-600">
+                                <span>Total Tagihan Tiket</span>
+                                <span class="font-extrabold text-sm text-slate-900" x-text="formatRupiah(tarif)"></span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs text-slate-600">
+                                <span>Kursi Dipilih</span>
+                                <span class="font-bold text-sky-600" x-text="kursiTerpilih ? 'Kursi #' + kursiTerpilih : 'Belum Dipilih'"></span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs text-slate-600 pt-2 border-t border-slate-200">
+                                <span>Status Transaksi</span>
+                                <span class="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 text-[11px]">
+                                    Langsung Lunas
+                                </span>
+                            </div>
                         </div>
 
-                        <!-- Baris 3: Kursi Belakang (Seat 4 & 5) -->
-                        <div class="grid grid-cols-2 gap-4 pt-4">
-                            <button type="button"
-                                    @click="pilihKursi(4)"
-                                    :class="kursiTerisi.includes(4) ? 'bg-rose-950/60 border-rose-800 text-rose-300 cursor-not-allowed' : (kursiTerpilih === 4 ? 'bg-sky-600 border-sky-400 text-white ring-2 ring-sky-300' : 'bg-slate-800 border-slate-700 hover:border-sky-500 text-slate-200 cursor-pointer')"
-                                    class="h-16 rounded-xl border flex flex-col items-center justify-center transition shadow-xs">
-                                <span class="font-heading font-bold text-base">Seat 04</span>
-                                <span class="text-[10px]" x-text="kursiTerisi.includes(4) ? 'Terisi' : (kursiTerpilih === 4 ? 'Dipilih' : 'Kosong')"></span>
-                            </button>
-
-                            <button type="button"
-                                    @click="pilihKursi(5)"
-                                    :class="kursiTerisi.includes(5) ? 'bg-rose-950/60 border-rose-800 text-rose-300 cursor-not-allowed' : (kursiTerpilih === 5 ? 'bg-sky-600 border-sky-400 text-white ring-2 ring-sky-300' : 'bg-slate-800 border-slate-700 hover:border-sky-500 text-slate-200 cursor-pointer')"
-                                    class="h-16 rounded-xl border flex flex-col items-center justify-center transition shadow-xs">
-                                <span class="font-heading font-bold text-base">Seat 05</span>
-                                <span class="text-[10px]" x-text="kursiTerisi.includes(5) ? 'Terisi' : (kursiTerpilih === 5 ? 'Dipilih' : 'Kosong')"></span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Legenda Denah -->
-                    <div class="flex items-center justify-center gap-6 text-xs text-slate-600 pt-2">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3.5 h-3.5 rounded bg-slate-800 border border-slate-600"></span>
-                            <span>Kosong</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-3.5 h-3.5 rounded bg-sky-600"></span>
-                            <span>Pilihan Anda</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-3.5 h-3.5 rounded bg-rose-900 border border-rose-700"></span>
-                            <span>Sudah Terisi</span>
-                        </div>
+                        <button type="submit"
+                                :disabled="!kursiTerpilih"
+                                :class="kursiTerpilih ? 'bg-sky-600 hover:bg-sky-700 text-white cursor-pointer' : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
+                                class="w-full py-3 text-xs font-bold rounded-xl transition duration-150 shadow-sm flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75" />
+                            </svg>
+                            <span>Proses & Cetak Tiket Loket</span>
+                        </button>
                     </div>
                 </div>
             </div>
+        </form>
+    @endif
 
-            <!-- Kolom Kanan: Data Penumpang & Pembayaran Loket -->
-            <div class="lg:col-span-5 space-y-6">
-                <!-- Box Data Penumpang Offline -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
-                    <h2 class="font-heading font-bold text-slate-900 text-sm pb-2 border-b border-slate-100">
-                        Identitas Penumpang Walk-in
-                    </h2>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap Penumpang</label>
-                        <input type="text" x-model="namaPenumpang" required placeholder="Contoh: Hendra Kusuma"
-                               class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Nomor Telepon / WhatsApp</label>
-                        <input type="text" x-model="teleponPenumpang" required placeholder="Contoh: 0813-8899-2211"
-                               class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Jenis Kelamin</label>
-                        <div class="grid grid-cols-2 gap-3">
-                            <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer text-xs font-semibold"
-                                   :class="jenisKelamin === 'L' ? 'bg-sky-50 border-sky-500 text-sky-800' : 'border-slate-200 text-slate-700'">
-                                <input type="radio" name="jk" value="L" x-model="jenisKelamin" class="sr-only">
-                                <span>Laki-laki</span>
-                            </label>
-                            <label class="flex items-center gap-2 p-2.5 border rounded-xl cursor-pointer text-xs font-semibold"
-                                   :class="jenisKelamin === 'P' ? 'bg-sky-50 border-sky-500 text-sky-800' : 'border-slate-200 text-slate-700'">
-                                <input type="radio" name="jk" value="P" x-model="jenisKelamin" class="sr-only">
-                                <span>Perempuan</span>
-                            </label>
-                        </div>
-                    </div>
+    <!-- Riwayat Transaksi Loket Terbaru -->
+    @if ($riwayatPesanan->isNotEmpty())
+        <div class="mt-12 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4" data-aos="fade-up">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div>
+                    <h2 class="font-heading font-bold text-slate-900 text-sm">Riwayat Transaksi Loket Terbaru</h2>
+                    <div class="text-[11px] text-slate-500">Daftar reservasi konter yang telah berhasil diterbitkan</div>
                 </div>
+                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Status Lunas
+                </span>
+            </div>
 
-                <!-- Box Metode Pembayaran Loket & Ringkasan -->
-                <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-4">
-                    <h2 class="font-heading font-bold text-slate-900 text-sm pb-2 border-b border-slate-100">
-                        Metode Pembayaran Loket
-                    </h2>
-
-                    <!-- Pilihan Tunai / QRIS -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="flex flex-col items-center justify-center p-3 border rounded-2xl cursor-pointer text-center transition"
-                               :class="metodeBayar === 'tunai' ? 'bg-slate-900 text-white border-slate-900' : 'border-slate-200 text-slate-700 hover:bg-slate-50'">
-                            <input type="radio" name="metode" value="tunai" x-model="metodeBayar" class="sr-only">
-                            <svg class="w-5 h-5 mb-1 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6H2.25m0 0v1.5a.75.75 0 0 0 .75.75H3m0 0h1.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 0 .75.75h1.5m0 0h1.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 0 .75.75h1.5m0 0h1.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 0 .75.75h1.5m-15-12v15m0 0h15" />
-                            </svg>
-                            <span class="text-xs font-bold">Tunai (Cash)</span>
-                        </label>
-
-                        <label class="flex flex-col items-center justify-center p-3 border rounded-2xl cursor-pointer text-center transition"
-                               :class="metodeBayar === 'qris' ? 'bg-slate-900 text-white border-slate-900' : 'border-slate-200 text-slate-700 hover:bg-slate-50'">
-                            <input type="radio" name="metode" value="qris" x-model="metodeBayar" class="sr-only">
-                            <svg class="w-5 h-5 mb-1 text-sky-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
-                            </svg>
-                            <span class="text-xs font-bold">QRIS Loket</span>
-                        </label>
-                    </div>
-
-                    <!-- Total Tarif Tagihan -->
-                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
-                        <div class="flex items-center justify-between text-xs text-slate-500">
-                            <span>Tarif Tiket Armada</span>
-                            <span class="font-bold text-slate-900" x-text="'Rp ' + tarifRute.toLocaleString('id-ID')"></span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs text-slate-500">
-                            <span>Status Verifikasi</span>
-                            <span class="font-bold text-emerald-600">Lunas Instan (Loket)</span>
-                        </div>
-                        <div class="pt-2 border-t border-slate-200 flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-900">Total Wajib Bayar</span>
-                            <span class="font-heading text-xl font-extrabold text-sky-600" x-text="'Rp ' + tarifRute.toLocaleString('id-ID')"></span>
-                        </div>
-                    </div>
-
-                    <!-- Tombol Cetak Tiket Loket Instan -->
-                    <button type="submit"
-                            class="w-full py-3.5 px-4 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition shadow-sm shadow-sky-600/20 flex items-center justify-center gap-2 cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.641-2.062-1.17-2.915a11.96 11.96 0 0 1 7.45-7.45c.853.529 1.839.93 2.915 1.17a11.96 11.96 0 0 1-7.45 7.45c-.853-.529-1.839-.93-2.915-1.17ZM6 18v3h12v-3m0-6V4H6v8m12 0H6" />
-                        </svg>
-                        <span>Cetak Tiket Loket Instan</span>
-                    </button>
-                </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-slate-50/80 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                        <tr>
+                            <th class="px-4 py-3">Kode Booking</th>
+                            <th class="px-4 py-3">Pelanggan</th>
+                            <th class="px-4 py-3">Rute & Waktu</th>
+                            <th class="px-4 py-3 text-center">Kursi</th>
+                            <th class="px-4 py-3 text-right">Tarif</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach ($riwayatPesanan as $rp)
+                            <tr class="hover:bg-slate-50/60 transition text-xs">
+                                <td class="px-4 py-3 font-mono font-bold text-slate-900">
+                                    {{ $rp->kode_pesanan }}
+                                </td>
+                                <td class="px-4 py-3 font-medium text-slate-800">
+                                    {{ $rp->pengguna->nama ?? '-' }}
+                                </td>
+                                <td class="px-4 py-3 text-slate-600">
+                                    {{ $rp->jadwal->kotaAsal->nama_kota ?? '-' }} &rarr; {{ $rp->jadwal->kotaTujuan->nama_kota ?? '-' }}
+                                    <div class="text-[10px] text-slate-400">
+                                        {{ $rp->jadwal->tanggal_berangkat ? $rp->jadwal->tanggal_berangkat->format('d M Y') : '-' }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-center font-bold">
+                                    #{{ $rp->nomor_kursi }}
+                                </td>
+                                <td class="px-4 py-3 text-right font-extrabold text-slate-900">
+                                    Rp {{ number_format($rp->harga_snapshot, 0, ',', '.') }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
-    </form>
-
-    <!-- Modal Cetak Struk Tiket Loket Sukses -->
-    <div x-show="modalCetak"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 scale-95"
-         x-transition:enter-end="opacity-100 scale-100"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
-         x-cloak>
-        <div @click.away="modalCetak = false"
-             class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5">
-            <!-- Icon Sukses -->
-            <div class="text-center">
-                <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto mb-3">
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                    </svg>
-                </div>
-                <h3 class="font-heading font-extrabold text-slate-900 text-lg">Tiket Loket Berhasil Diterbitkan</h3>
-                <p class="text-xs text-slate-500 mt-1">Pembayaran telah diterima dan nomor kursi berhasil dikunci di sistem.</p>
-            </div>
-
-            <!-- Rincian Struk Tiket Kasir Thermal Model -->
-            <div class="bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-5 font-mono text-xs space-y-3">
-                <div class="text-center font-bold text-slate-900 border-b border-dashed border-slate-300 pb-2">
-                    GOTIX TRAVEL INDONESIA<br>
-                    <span class="text-[10px] text-slate-500 font-normal">Loket Konter Resmi Gotix</span>
-                </div>
-                <div class="space-y-1 text-slate-700">
-                    <div class="flex justify-between">
-                        <span>KODE:</span>
-                        <span class="font-bold text-slate-900" x-text="kodeTiketInstan"></span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>PENUMPANG:</span>
-                        <span class="font-bold" x-text="namaPenumpang"></span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>KURSI:</span>
-                        <span class="font-bold text-sky-600" x-text="'SEAT #' + kursiTerpilih"></span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>METODE:</span>
-                        <span class="uppercase font-semibold" x-text="metodeBayar"></span>
-                    </div>
-                    <div class="flex justify-between pt-2 border-t border-dashed border-slate-300 text-sm font-bold text-slate-900">
-                        <span>TOTAL:</span>
-                        <span x-text="'Rp ' + tarifRute.toLocaleString('id-ID')"></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <button type="button" @click="window.print()"
-                        class="flex-1 py-3 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24-1.076-.641-2.062-1.17-2.915a11.96 11.96 0 0 1 7.45-7.45c.853.529 1.839.93 2.915 1.17a11.96 11.96 0 0 1-7.45 7.45c-.853-.529-1.839-.93-2.915-1.17ZM6 18v3h12v-3m0-6V4H6v8m12 0H6" />
-                    </svg>
-                    <span>Cetak Kertas Thermal</span>
-                </button>
-                <button type="button" @click="modalCetak = false; window.location.reload();"
-                        class="py-3 px-4 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer">
-                    Selesai
-                </button>
-            </div>
-        </div>
-    </div>
+    @endif
 </div>
 @endsection
-
