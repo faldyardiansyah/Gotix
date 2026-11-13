@@ -224,6 +224,33 @@ test('operator dapat mengakses halaman pembayaran operator (200)', function () {
         ->assertOk();
 });
 
+test('operator dapat mengakses halaman kasir loket (200)', function () {
+    $operator = buatPengguna(PeranPengguna::Operator);
+
+    $this->actingAs($operator)
+        ->get(route('operator.loket.index'))
+        ->assertOk()
+        ->assertSee('Kasir Loket & Penumpang Walk-in');
+});
+
+test('operator dapat mengakses halaman riwayat transaksi loket (200)', function () {
+    $operator = buatPengguna(PeranPengguna::Operator);
+
+    $this->actingAs($operator)
+        ->get(route('operator.riwayat.index'))
+        ->assertOk()
+        ->assertSee('Riwayat Transaksi Loket')
+        ->assertSee('Tiket Berstatus Lunas');
+});
+
+test('operator dapat mencari riwayat transaksi loket berdasarkan kata kunci', function () {
+    $operator = buatPengguna(PeranPengguna::Operator);
+
+    $this->actingAs($operator)
+        ->get(route('operator.riwayat.index', ['cari' => 'GTX-TEST']))
+        ->assertOk();
+});
+
 test('member dapat mengakses halaman tiket member (200)', function () {
     $member = buatPengguna(PeranPengguna::Member);
 

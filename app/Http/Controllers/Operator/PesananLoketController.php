@@ -30,13 +30,50 @@ class PesananLoketController extends Controller
 
         $daftarMember = Pengguna::where('peran', PeranPengguna::Member)->orderBy('nama')->get();
 
-        $riwayatPesanan = Pesanan::with(['jadwal.kotaAsal', 'jadwal.kotaTujuan', 'pengguna'])
-            ->where('status', StatusPesanan::Lunas)
-            ->latest()
-            ->take(8)
-            ->get();
+        return view('operator.loket.index', compact('jadwalAktif', 'daftarMember'));
+    }
 
-        return view('operator.loket.index', compact('jadwalAktif', 'daftarMember', 'riwayatPesanan'));
+    public function riwayat(Request $request): View
+    {
+        $riwayatQuery = Pesanan::with(['jadwal.kotaAsal', 'jadwal.kotaTujuan', 'jadwal.kendaraan', 'pengguna'])
+            ->where('status', StatusPesanan::Lunas)
+            ->latest();
+
+        if ($request->filled('cari')) {
+            $cari = trim($request->cari);
+            $riwayatQuery->where(function ($q) use ($cari) {
+                $q->where('kode_pesanan', 'like', "%{$cari}%")
+                    ->orWhere('nama_penumpang', 'like', "%{$cari}%")
+                    ->orWhere('telepon_penumpang', 'like', "%{$cari}%")
+                    ->orWhereHas('pengguna', function ($qp) use ($cari) {
+                        $qp->where('nama', 'like', "%{$cari}%")
+                            ->orWhere('telepon', 'like', "%{$cari}%")
+                            ->orWhere('username', 'like', "%{$cari}%");
+                    })
+                    ->orWhereHas('jadwal.kotaAsal', function ($qka) use ($cari) {
+                        $qka->where('nama_kota', 'like', "%{$cari}%");
+                    })
+                    ->orWhereHas('jadwal.kotaTujuan', function ($qkt) use ($cari) {
+                        $qkt->where('nama_kota', 'like', "%{$cari}%");
+                    });
+            });
+        }
+
+        if ($request->filled('tipe')) {
+            if ($request->tipe === 'member') {
+                $riwayatQuery->whereNotNull('pengguna_id');
+            } elseif ($request->tipe === 'walkin') {
+                $riwayatQuery->whereNull('pengguna_id');
+            }
+        }
+
+        $riwayatPesanan = $riwayatQuery->paginate(12)->withQueryString();
+
+        $totalLunas = Pesanan::where('status', StatusPesanan::Lunas)->count();
+        $totalWalkin = Pesanan::where('status', StatusPesanan::Lunas)->whereNull('pengguna_id')->count();
+        $totalMember = Pesanan::where('status', StatusPesanan::Lunas)->whereNotNull('pengguna_id')->count();
+
+        return view('operator.riwayat.index', compact('riwayatPesanan', 'totalLunas', 'totalWalkin', 'totalMember'));
     }
 
     public function create(): RedirectResponse

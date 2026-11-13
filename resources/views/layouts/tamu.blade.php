@@ -72,13 +72,6 @@
                         </span>
                     </a>
 
-                    @if (request()->routeIs('member.*'))
-                        <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 border-2 border-slate-900 text-slate-950 text-[11px] font-heading font-black shadow-[1.5px_1.5px_0px_#18181b]">
-                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                            <span>Portal Penumpang</span>
-                        </span>
-                    @endif
-
                     @if (!request()->routeIs('member.*'))
                         <!-- Nav Link Publik (Tengah) - Hanya muncul pada Halaman Publik -->
                         <nav class="hidden md:flex items-center gap-2 ml-4">

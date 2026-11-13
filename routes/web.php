@@ -83,6 +83,7 @@ Route::middleware(['auth', 'peran:Operator'])->prefix('operator')->name('operato
     Route::get('/loket', [Operator\PesananLoketController::class, 'index'])->name('loket.index');
     Route::get('/loket/buat', [Operator\PesananLoketController::class, 'create'])->name('loket.create');
     Route::post('/loket', [Operator\PesananLoketController::class, 'store'])->name('loket.store');
+    Route::get('/riwayat', [Operator\PesananLoketController::class, 'riwayat'])->name('riwayat.index');
 });
 
 /*

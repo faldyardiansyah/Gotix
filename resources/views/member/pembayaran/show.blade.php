@@ -34,7 +34,7 @@
     $waktuBerangkat = $pesanan->jadwal ? \Carbon\Carbon::parse($pesanan->jadwal->waktu_berangkat) : null;
     $batasBayar = $pesanan->batas_bayar ? \Carbon\Carbon::parse($pesanan->batas_bayar) : null;
     $bankNama = config('gotix.bank.nama', 'Bank Central Asia (BCA)');
-    $bankRekening = config('gotix.bank.rekening', '0000000000');
+    $bankRekening = config('gotix.bank.rekening', '8610566376');
     $bankPemilik = config('gotix.bank.pemilik', 'PT Gotix Transportasi Indonesia');
     @endphp
 
