@@ -1,251 +1,244 @@
 @extends('layouts.admin')
 
-@section('title', 'Detail Pesanan #' . $pesanan->kode_pesanan)
+@section('title', 'Detail Pesanan #' . $pesanan->kode_pesanan . ' — GoTix.')
+@section('page-title', 'Detail Pesanan #' . $pesanan->kode_pesanan)
+@section('page-subtitle', 'Informasi lengkap reservasi tiket, bukti transfer manual, dan status pembayaran.')
 
 @section('konten')
 <div class="space-y-6" x-data="{ modalTolak: false }">
-    <!-- Header -->
+    <!-- Header Aksi & Breadcrumb -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <div class="flex items-center gap-3">
-                <a href="{{ route('admin.pesanan.index') }}" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                    </svg>
-                </a>
-                <div>
-                    <h1 class="font-heading font-bold text-xl sm:text-2xl text-slate-900">
-                        Pesanan #{{ $pesanan->kode_pesanan }}
-                    </h1>
-                    <p class="text-xs text-slate-500 mt-0.5">
-                        Dibuat pada {{ $pesanan->created_at ? $pesanan->created_at->format('d M Y H:i') : '-' }} WIB
-                    </p>
-                </div>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('admin.pesanan.index') }}"
+               class="p-2 bg-white text-slate-900 border-2 border-slate-900 rounded-xl hover:bg-amber-100 shadow-[2px_2px_0px_#18181b] transition">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>
+            </a>
+            <div>
+                <h1 class="font-heading font-black text-xl sm:text-2xl text-slate-950">
+                    Pesanan #{{ $pesanan->kode_pesanan }}
+                </h1>
+                <p class="text-xs text-slate-600 font-semibold mt-0.5">
+                    Dibuat pada {{ $pesanan->created_at ? $pesanan->created_at->format('d M Y H:i') : '-' }} WIB
+                </p>
             </div>
         </div>
 
-        @php
-            $statusVal = $pesanan->status?->value ?? (string) $pesanan->status;
-            $badgeColor = match ($statusVal) {
-                'Lunas' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                'Dalam Proses' => 'bg-sky-50 text-sky-700 border-sky-200',
-                'Belum Bayar' => 'bg-amber-50 text-amber-700 border-amber-200',
-                default => 'bg-rose-50 text-rose-700 border-rose-200',
-            };
-        @endphp
-
-        <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border {{ $badgeColor }} self-start sm:self-auto">
-            <span class="w-2 h-2 rounded-full {{ $statusVal === 'Lunas' ? 'bg-emerald-500' : ($statusVal === 'Dalam Proses' ? 'bg-sky-500 animate-pulse' : 'bg-amber-500') }}"></span>
-            Status: {{ $statusVal }}
-        </span>
+        <div>
+            <x-badge-status :status="$pesanan->status" size="md" />
+        </div>
     </div>
 
-    @if (session('sukses'))
-        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl p-4 text-xs font-medium">
-            {{ session('sukses') }}
-        </div>
-    @endif
+    @php
+        $statusVal = $pesanan->status instanceof \App\Enums\StatusPesanan ? $pesanan->status->value : (string) $pesanan->status;
+        $isWalkIn = ($pesanan->pengguna?->peran?->value ?? '') === 'Operator';
+    @endphp
 
-    @if (session('gagal'))
-        <div class="bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-4 text-xs font-medium">
-            {{ session('gagal') }}
-        </div>
-    @endif
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Kolom Kiri: Rincian Perjalanan & Penumpang -->
+        <div class="space-y-6">
+            <x-card title="Data Perjalanan & Penumpang" subtitle="Informasi rute, armada, dan pemesan tiket" variant="white">
+                <div class="space-y-3 text-xs">
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-stone-50 border border-slate-900">
+                        <span class="text-slate-500 font-bold uppercase text-[10px]">Kode Booking</span>
+                        <span class="font-mono font-black text-slate-950 text-sm">{{ $pesanan->kode_pesanan }}</span>
+                    </div>
 
-    @if ($errors->any())
-        <div class="bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl p-4 text-xs font-medium space-y-1">
-            @foreach ($errors->all() as $error)
-                <p>• {{ $error }}</p>
-            @endforeach
-        </div>
-    @endif
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-stone-50 border border-slate-900">
+                        <span class="text-slate-500 font-bold uppercase text-[10px]">Nama Pemesan</span>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('admin.pengguna.show', $pesanan->pengguna_id) }}" class="font-bold text-amber-700 hover:text-amber-900 underline">
+                                {{ $pesanan->pengguna?->nama ?? '-' }}
+                            </a>
+                            @if ($isWalkIn)
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-heading font-black bg-stone-200 border border-slate-900">Loket</span>
+                            @else
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-heading font-black bg-amber-100 border border-slate-900">Member</span>
+                            @endif
+                        </div>
+                    </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Rincian Data Perjalanan & Penumpang -->
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
-            <h2 class="font-heading font-bold text-slate-900 text-sm border-b border-slate-100 pb-3">
-                Data Perjalanan & Penumpang
-            </h2>
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-stone-50 border border-slate-900">
+                        <span class="text-slate-500 font-bold uppercase text-[10px]">No. Telepon / WhatsApp</span>
+                        <span class="font-mono font-bold text-slate-950">{{ $pesanan->pengguna?->telepon ?? '-' }}</span>
+                    </div>
 
-            <div class="space-y-3 text-xs">
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Kode Booking</span>
-                    <span class="font-mono font-bold text-slate-900">{{ $pesanan->kode_pesanan }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Nama Pemesan</span>
-                    <a href="{{ route('admin.pengguna.show', $pesanan->pengguna_id) }}" class="font-semibold text-sky-600 hover:underline">
-                        {{ $pesanan->pengguna?->nama ?? '-' }}
-                    </a>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">No. Telepon</span>
-                    <span class="font-mono text-slate-800">{{ $pesanan->pengguna?->telepon ?? '-' }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Rute Perjalanan</span>
-                    <span class="font-semibold text-slate-900">
-                        {{ $pesanan->jadwal?->kotaAsal?->nama_kota ?? '-' }} → {{ $pesanan->jadwal?->kotaTujuan?->nama_kota ?? '-' }}
-                    </span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Armada</span>
-                    <span class="text-slate-800">{{ $pesanan->jadwal?->kendaraan?->jenis_kendaraan ?? '-' }} ({{ $pesanan->jadwal?->kendaraan?->nomor_polisi ?? '-' }})</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Waktu Berangkat</span>
-                    <span class="text-slate-800">
-                        {{ $pesanan->jadwal?->tanggal_berangkat ? date('d M Y', strtotime($pesanan->jadwal->tanggal_berangkat)) : '-' }}
-                        pukul {{ $pesanan->jadwal?->jam_berangkat ? substr($pesanan->jadwal->jam_berangkat, 0, 5) . ' WIB' : '-' }}
-                    </span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Nomor Kursi</span>
-                    <span class="font-bold text-sky-600">Kursi #{{ $pesanan->nomor_kursi }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-slate-400">Batas Pembayaran</span>
-                    <span class="font-mono font-bold text-slate-800">{{ $pesanan->batas_bayar ? $pesanan->batas_bayar->format('d M Y H:i') : '-' }} WIB</span>
-                </div>
-                <div class="flex justify-between pt-3 border-t border-slate-100 text-sm">
-                    <span class="font-bold text-slate-700">Total Tarif</span>
-                    <span class="font-extrabold text-sky-600">Rp {{ number_format($pesanan->harga_snapshot, 0, ',', '.') }}</span>
-                </div>
-            </div>
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-stone-50 border border-slate-900">
+                        <span class="text-slate-500 font-bold uppercase text-[10px]">Rute Perjalanan</span>
+                        <span class="font-black text-slate-950 text-sm">
+                            {{ $pesanan->jadwal?->kotaAsal?->nama_kota ?? '-' }}
+                            <span class="text-amber-600 px-1">&rarr;</span>
+                            {{ $pesanan->jadwal?->kotaTujuan?->nama_kota ?? '-' }}
+                        </span>
+                    </div>
 
-            <!-- Histori Riwayat Pembayaran (Audit Trail) -->
-            @if ($pesanan->riwayatPembayaran && $pesanan->riwayatPembayaran->count() > 0)
-                <div class="pt-4 border-t border-slate-100 space-y-3">
-                    <h3 class="font-heading font-bold text-slate-900 text-xs">Riwayat Unggahan & Verifikasi:</h3>
-                    <div class="space-y-2">
-                        @foreach ($pesanan->riwayatPembayaran as $index => $riwayat)
-                            <div class="p-3 border rounded-xl text-xs space-y-1.5 {{ $riwayat->status === 'Ditolak' ? 'bg-rose-50/50 border-rose-200' : ($riwayat->status === 'Diterima' ? 'bg-emerald-50/50 border-emerald-200' : 'bg-slate-50 border-slate-200') }}">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-bold text-slate-800">Unggahan #{{ $pesanan->riwayatPembayaran->count() - $index }} (Resi: {{ $riwayat->nomor_resi }})</span>
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase {{ $riwayat->status === 'Diterima' ? 'bg-emerald-100 text-emerald-800' : ($riwayat->status === 'Ditolak' ? 'bg-rose-100 text-rose-800' : 'bg-sky-100 text-sky-800') }}">
-                                        {{ $riwayat->status }}
-                                    </span>
-                                </div>
-                                <div class="text-[11px] text-slate-500">
-                                    {{ $riwayat->created_at ? $riwayat->created_at->format('d M Y H:i') : '-' }} WIB &bull; Rek: {{ $riwayat->rekening_pengirim }}
-                                </div>
-                                @if ($riwayat->diverifikasi_oleh)
-                                    <div class="text-[11px] text-slate-600">
-                                        Petugas: <strong>{{ $riwayat->verifikator?->nama ?? 'Petugas' }}</strong> ({{ $riwayat->diverifikasi_pada ? $riwayat->diverifikasi_pada->format('d M Y H:i') : '-' }} WIB)
-                                    </div>
-                                @endif
-                                @if ($riwayat->alasan_penolakan)
-                                    <div class="text-[11px] text-rose-700 bg-rose-100/60 p-2 rounded-lg">
-                                        <strong>Alasan:</strong> {{ $riwayat->alasan_penolakan }}
-                                    </div>
-                                @endif
-                                <div class="pt-1">
-                                    <a href="{{ route('pembayaran.bukti.riwayat', $riwayat->id) }}" target="_blank"
-                                       class="text-[11px] font-semibold text-sky-600 hover:underline">
-                                        Lihat File Bukti ↗
-                                    </a>
-                                </div>
-                            </div>
-                        @endforeach
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-stone-50 border border-slate-900">
+                        <span class="text-slate-500 font-bold uppercase text-[10px]">Armada Kendaraan</span>
+                        <span class="font-bold text-slate-950">{{ $pesanan->jadwal?->kendaraan?->jenis_kendaraan ?? '-' }} ({{ $pesanan->jadwal?->kendaraan?->nomor_polisi ?? '-' }})</span>
+                    </div>
+
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-stone-50 border border-slate-900">
+                        <span class="text-slate-500 font-bold uppercase text-[10px]">Waktu Keberangkatan</span>
+                        <span class="font-bold text-slate-950">
+                            {{ $pesanan->jadwal?->tanggal_berangkat ? date('d M Y', strtotime($pesanan->jadwal->tanggal_berangkat)) : '-' }} &bull;
+                            {{ $pesanan->jadwal?->jam_berangkat ? substr($pesanan->jadwal->jam_berangkat, 0, 5) . ' WIB' : '-' }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-amber-50 border-2 border-slate-900 shadow-[1.5px_1.5px_0px_#18181b]">
+                        <span class="text-amber-950 font-heading font-black uppercase text-[11px]">Nomor Kursi</span>
+                        <span class="font-heading font-black text-amber-950 text-base">Kursi #{{ $pesanan->nomor_kursi }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between p-2.5 rounded-xl bg-stone-50 border border-slate-900">
+                        <span class="text-slate-500 font-bold uppercase text-[10px]">Batas Waktu Bayar</span>
+                        <span class="font-mono font-bold text-slate-800">{{ $pesanan->batas_bayar ? $pesanan->batas_bayar->format('d M Y H:i') : '-' }} WIB</span>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3.5 rounded-xl bg-stone-100 border-2 border-slate-900 shadow-[2px_2px_0px_#18181b] mt-2">
+                        <span class="font-heading font-black text-slate-950 uppercase text-xs">Total Pembayaran</span>
+                        <span class="font-heading font-black text-slate-950 text-lg">Rp {{ number_format($pesanan->harga_snapshot, 0, ',', '.') }}</span>
                     </div>
                 </div>
-            @endif
+
+                <!-- Histori Riwayat Pembayaran (Audit Trail) -->
+                @if ($pesanan->riwayatPembayaran && $pesanan->riwayatPembayaran->count() > 0)
+                    <div class="mt-6 pt-5 border-t-2 border-slate-900 space-y-3">
+                        <h3 class="font-heading font-black text-slate-950 text-xs uppercase tracking-wider">
+                            Riwayat Unggahan & Verifikasi ({{ $pesanan->riwayatPembayaran->count() }})
+                        </h3>
+                        <div class="space-y-3">
+                            @foreach ($pesanan->riwayatPembayaran as $index => $riwayat)
+                                <div class="p-3.5 border-2 border-slate-900 rounded-xl text-xs space-y-2 {{ $riwayat->status === 'Ditolak' ? 'bg-rose-50 shadow-[2px_2px_0px_#e11d48]' : ($riwayat->status === 'Diterima' ? 'bg-emerald-50 shadow-[2px_2px_0px_#059669]' : 'bg-white shadow-[2px_2px_0px_#18181b]') }}">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-heading font-black text-slate-900">Unggahan #{{ $pesanan->riwayatPembayaran->count() - $index }} (Resi: {{ $riwayat->nomor_resi }})</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-heading font-black border border-slate-900 {{ $riwayat->status === 'Diterima' ? 'bg-emerald-200 text-emerald-950' : ($riwayat->status === 'Ditolak' ? 'bg-rose-200 text-rose-950' : 'bg-amber-200 text-amber-950') }}">
+                                            {{ $riwayat->status }}
+                                        </span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-600 font-semibold">
+                                        {{ $riwayat->created_at ? $riwayat->created_at->format('d M Y H:i') : '-' }} WIB &bull; Rek: {{ $riwayat->rekening_pengirim }}
+                                    </div>
+                                    @if ($riwayat->diverifikasi_oleh)
+                                        <div class="text-[11px] text-slate-800 font-medium">
+                                            Petugas: <strong>{{ $riwayat->verifikator?->nama ?? 'Petugas' }}</strong> ({{ $riwayat->diverifikasi_pada ? $riwayat->diverifikasi_pada->format('d M Y H:i') : '-' }} WIB)
+                                        </div>
+                                    @endif
+                                    @if ($riwayat->alasan_penolakan)
+                                        <div class="text-[11px] text-rose-900 bg-rose-100 border border-rose-300 p-2 rounded-lg font-semibold">
+                                            <strong>Alasan Penolakan:</strong> {{ $riwayat->alasan_penolakan }}
+                                        </div>
+                                    @endif
+                                    <div class="pt-1">
+                                        <a href="{{ route('pembayaran.bukti.riwayat', $riwayat->id) }}" target="_blank"
+                                           class="inline-flex items-center gap-1 text-[11px] font-heading font-extrabold text-amber-700 hover:text-amber-900 underline">
+                                            <span>Lihat File Struk ↗</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </x-card>
         </div>
 
-        <!-- Bukti Pembayaran & Aksi Verifikasi / Tolak -->
-        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-4">
-            <div>
-                <h2 class="font-heading font-bold text-slate-900 text-sm border-b border-slate-100 pb-3">
-                    Bukti Pembayaran & Status
-                </h2>
-
+        <!-- Kolom Kanan: Bukti Transfer & Verifikasi -->
+        <div class="space-y-6">
+            <x-card title="Bukti Transfer & Tindakan" subtitle="Tinjau bukti pembayaran manual yang diunggah" variant="white">
                 @if ($pesanan->konfirmasiPembayaran)
-                    <div class="mt-4 space-y-3 text-xs">
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">Rekening Pengirim</span>
-                            <span class="font-semibold text-slate-900">{{ $pesanan->konfirmasiPembayaran->rekening_pengirim }}</span>
+                    <div class="space-y-4 text-xs">
+                        <div class="flex items-center justify-between p-2.5 rounded-xl bg-stone-50 border border-slate-900">
+                            <span class="text-slate-500 font-bold uppercase text-[10px]">Rekening Pengirim</span>
+                            <span class="font-bold text-slate-950">{{ $pesanan->konfirmasiPembayaran->rekening_pengirim }}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">Nomor Resi / Referensi</span>
-                            <span class="font-mono font-bold text-slate-800">{{ $pesanan->konfirmasiPembayaran->nomor_resi }}</span>
+                        <div class="flex items-center justify-between p-2.5 rounded-xl bg-stone-50 border border-slate-900">
+                            <span class="text-slate-500 font-bold uppercase text-[10px]">Nomor Resi / Referensi</span>
+                            <span class="font-mono font-black text-slate-950">{{ $pesanan->konfirmasiPembayaran->nomor_resi }}</span>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="text-slate-400">Waktu Transfer</span>
-                            <span class="text-slate-700 font-medium">
+                        <div class="flex items-center justify-between p-2.5 rounded-xl bg-stone-50 border border-slate-900">
+                            <span class="text-slate-500 font-bold uppercase text-[10px]">Waktu Transfer</span>
+                            <span class="font-bold text-slate-950">
                                 {{ $pesanan->konfirmasiPembayaran->tanggal_transfer ? date('d M Y', strtotime($pesanan->konfirmasiPembayaran->tanggal_transfer)) : '-' }}
                                 {{ $pesanan->konfirmasiPembayaran->jam_transfer ? substr($pesanan->konfirmasiPembayaran->jam_transfer, 0, 5) . ' WIB' : '' }}
                             </span>
                         </div>
 
-                        <div class="pt-2">
-                            <span class="font-semibold text-slate-700 block mb-2">Foto Struk Bukti Transfer Terakhir:</span>
+                        <div>
+                            <span class="block font-heading font-black text-xs uppercase tracking-wider text-slate-900 mb-2">
+                                Foto Struk Bukti Transfer:
+                            </span>
                             @if ($pesanan->konfirmasiPembayaran->bukti_path)
                                 <a href="{{ route('pembayaran.bukti', $pesanan->konfirmasiPembayaran->id) }}" target="_blank"
-                                   class="block border border-slate-200 rounded-xl overflow-hidden hover:opacity-90 transition">
+                                   class="block border-2 border-slate-900 rounded-2xl overflow-hidden hover:opacity-95 shadow-[3px_3px_0px_#18181b] transition">
                                     <img src="{{ route('pembayaran.bukti', $pesanan->konfirmasiPembayaran->id) }}"
-                                         alt="Bukti Transfer" class="w-full max-h-52 object-cover bg-slate-50">
-                                    <span class="block text-center text-[11px] text-sky-600 py-1.5 bg-slate-50 border-t border-slate-100 font-medium">
-                                        Perbesar bukti transfer ↗
+                                         alt="Bukti Transfer" class="w-full max-h-64 object-cover bg-stone-100">
+                                    <span class="block text-center text-xs font-heading font-black text-slate-950 py-2 bg-amber-400 border-t-2 border-slate-900">
+                                        Klik untuk Perbesar Bukti Transfer ↗
                                     </span>
                                 </a>
                             @else
-                                <div class="p-4 bg-slate-50 rounded-xl text-center text-xs text-slate-400">File bukti tidak ditemukan.</div>
+                                <div class="p-6 bg-stone-50 border-2 border-slate-900 rounded-2xl text-center text-xs font-bold text-slate-500">
+                                    File bukti tidak ditemukan di penyimpanan server.
+                                </div>
                             @endif
                         </div>
                     </div>
                 @else
-                    <div class="mt-6 p-5 bg-slate-50 border border-slate-200 rounded-xl text-center text-xs text-slate-500 space-y-1">
-                        <p class="font-bold text-slate-700">Belum ada bukti pembayaran diunggah.</p>
-                        <p class="text-slate-400">Member belum melakukan konfirmasi transfer manual.</p>
+                    <div class="p-6 bg-amber-50 border-2 border-slate-900 rounded-2xl text-center text-xs text-amber-950 space-y-1 shadow-[2px_2px_0px_#18181b]">
+                        <p class="font-heading font-black text-sm">Belum Ada Bukti Pembayaran</p>
+                        <p class="font-medium text-slate-600">Penumpang belum mengunggah bukti transfer manual untuk pesanan ini.</p>
                     </div>
                 @endif
-            </div>
 
-            <!-- Tombol Aksi Admin: Verifikasi / Tolak (State Guarded) -->
-            <div class="pt-4 border-t border-slate-100">
-                @if ($statusVal === 'Dalam Proses')
-                    <div class="flex items-center gap-3">
-                        <form action="{{ route('admin.pesanan.verifikasi', $pesanan->id) }}" method="POST" class="flex-1"
-                              onsubmit="return confirm('Verifikasi pesanan ini menjadi Lunas?')">
-                            @csrf
-                            <button type="submit"
-                                    class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-xs text-center cursor-pointer">
-                                Terima (Lunas)
-                            </button>
-                        </form>
+                <!-- Tombol Aksi Verifikasi / Tolak -->
+                <div class="mt-6 pt-5 border-t-2 border-slate-900">
+                    @if ($statusVal === 'Dalam Proses')
+                        <div class="flex flex-col sm:flex-row items-center gap-3">
+                            <form action="{{ route('admin.pesanan.verifikasi', $pesanan->id) }}" method="POST" class="w-full sm:flex-1"
+                                  onsubmit="return confirm('Verifikasi pembayaran ini dan ubah status pesanan menjadi Lunas?')">
+                                @csrf
+                                <x-button type="submit" variant="primary" size="md" class="w-full">
+                                    <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                    </svg>
+                                    <span>Terima & Set Lunas</span>
+                                </x-button>
+                            </form>
 
-                        <button type="button"
-                                @click="modalTolak = true"
-                                class="flex-1 py-2.5 px-4 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold rounded-xl transition text-center cursor-pointer">
-                            Tolak Pesanan...
-                        </button>
-                    </div>
-                @elseif ($statusVal === 'Lunas')
-                    <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-center text-xs text-emerald-800 space-y-0.5">
-                        <div class="font-bold">Pesanan LUNAS</div>
-                        <div class="text-[11px]">
-                            Diverifikasi oleh: <strong>{{ $pesanan->konfirmasiPembayaran?->verifikator?->nama ?? 'Petugas' }}</strong>
-                            pada {{ $pesanan->konfirmasiPembayaran?->diverifikasi_pada ? $pesanan->konfirmasiPembayaran->diverifikasi_pada->format('d M Y H:i') : '-' }} WIB
+                            <x-button type="button" @click="modalTolak = true" variant="danger" size="md" class="w-full sm:flex-1">
+                                <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                <span>Tolak Pembayaran...</span>
+                            </x-button>
                         </div>
-                    </div>
-                @elseif ($statusVal === 'Belum Bayar')
-                    <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 space-y-1">
-                        <div class="font-bold">Menunggu Pembayaran Penumpang</div>
-                        @if ($pesanan->konfirmasiPembayaran?->alasan_penolakan)
-                            <div class="text-[11px] text-rose-700 bg-white/70 p-2 rounded-lg">
-                                <strong>Penolakan Terakhir:</strong> {{ $pesanan->konfirmasiPembayaran->alasan_penolakan }}
-                                <div class="text-[10px] text-slate-500 pt-0.5">
-                                    Oleh: {{ $pesanan->konfirmasiPembayaran->verifikator?->nama ?? 'Petugas' }} ({{ $pesanan->konfirmasiPembayaran->diverifikasi_pada ? $pesanan->konfirmasiPembayaran->diverifikasi_pada->format('d M Y H:i') : '-' }} WIB)
-                                </div>
+                    @elseif ($statusVal === 'Lunas')
+                        <div class="p-4 bg-emerald-100 border-2 border-slate-900 rounded-2xl text-center text-xs text-emerald-950 space-y-1 shadow-[3px_3px_0px_#18181b]">
+                            <div class="font-heading font-black text-sm">Pesanan Telah LUNAS</div>
+                            <div class="font-semibold text-slate-700">
+                                Diverifikasi oleh: <strong>{{ $pesanan->konfirmasiPembayaran?->verifikator?->nama ?? 'Petugas' }}</strong>
+                                pada {{ $pesanan->konfirmasiPembayaran?->diverifikasi_pada ? $pesanan->konfirmasiPembayaran->diverifikasi_pada->format('d M Y H:i') : '-' }} WIB
                             </div>
-                        @endif
-                    </div>
-                @else
-                    <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-center text-xs font-semibold text-rose-700">
-                        Pesanan ini telah DIBATALKAN.
-                    </div>
-                @endif
-            </div>
+                        </div>
+                    @elseif ($statusVal === 'Belum Bayar')
+                        <div class="p-4 bg-amber-100 border-2 border-slate-900 rounded-2xl text-xs text-amber-950 space-y-1 shadow-[2px_2px_0px_#18181b]">
+                            <div class="font-heading font-black text-sm">Menunggu Pembayaran Penumpang</div>
+                            <p class="font-medium text-slate-700">Penumpang masih dalam tenggat waktu pembayaran sebelum pesanan otomatis kedaluwarsa.</p>
+                            @if ($pesanan->konfirmasiPembayaran?->alasan_penolakan)
+                                <div class="text-[11px] text-rose-900 bg-white border border-rose-300 p-2 rounded-xl mt-2 font-bold">
+                                    <strong>Penolakan Sebelumnya:</strong> {{ $pesanan->konfirmasiPembayaran->alasan_penolakan }}
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        <div class="p-4 bg-rose-100 border-2 border-slate-900 rounded-2xl text-center text-xs font-heading font-black text-rose-950 shadow-[2px_2px_0px_#18181b]">
+                            Pesanan ini telah DIBATALKAN / KEDALUWARSA.
+                        </div>
+                    @endif
+                </div>
+            </x-card>
         </div>
     </div>
 
@@ -254,14 +247,14 @@
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm"
          style="display: none;">
         <div @click.away="modalTolak = false"
-             class="bg-white rounded-2xl border border-slate-200 p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 class="font-heading font-bold text-slate-900 text-sm">Alasan Penolakan Pembayaran</h3>
-                <button type="button" @click="modalTolak = false" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+             class="bg-white rounded-2xl border-2 border-slate-900 p-6 max-w-md w-full shadow-[6px_6px_0px_#18181b] space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b-2 border-slate-900">
+                <h3 class="font-heading font-black text-slate-950 text-base">Alasan Penolakan Pembayaran</h3>
+                <button type="button" @click="modalTolak = false" class="p-1 rounded-lg text-slate-500 hover:text-slate-950">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                     </svg>
                 </button>
@@ -270,29 +263,27 @@
             <form action="{{ route('admin.pesanan.tolak', $pesanan->id) }}" method="POST" class="space-y-4">
                 @csrf
                 <div>
-                    <label for="admin_alasan_penolakan" class="block text-xs font-semibold text-slate-700 mb-1">
-                        Jelaskan alasan penolakan: <span class="text-rose-500">*</span>
+                    <label for="admin_alasan_penolakan" class="block font-heading font-black text-xs uppercase tracking-wider text-slate-900 mb-1.5">
+                        Jelaskan alasan penolakan: <span class="text-rose-600">*</span>
                     </label>
                     <textarea id="admin_alasan_penolakan"
                               name="alasan_penolakan"
                               rows="4"
                               required
-                              placeholder="Contoh: Bukti transfer tidak valid atau nominal tidak sesuai."
-                              class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500"></textarea>
-                    <p class="text-[11px] text-slate-500 mt-1">
+                              placeholder="Contoh: Bukti transfer buram, mutasi belum masuk, atau nominal transfer tidak sesuai tiket."
+                              class="w-full rounded-xl border-2 border-slate-900 bg-white p-3 text-xs font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:outline-none focus:border-amber-500 focus:shadow-[3px_3px_0px_#f59e0b]"></textarea>
+                    <p class="text-[11px] text-slate-500 font-semibold mt-1.5">
                         Status pesanan akan dikembalikan ke <strong>Belum Bayar</strong> agar penumpang dapat mengunggah bukti yang benar.
                     </p>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-2">
-                    <button type="button" @click="modalTolak = false"
-                            class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                <div class="flex items-center justify-end gap-2.5 pt-2">
+                    <x-button type="button" @click="modalTolak = false" variant="secondary" size="sm">
                         Batal
-                    </button>
-                    <button type="submit"
-                            class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl transition shadow-xs">
+                    </x-button>
+                    <x-button type="submit" variant="danger" size="sm">
                         Kirim Penolakan
-                    </button>
+                    </x-button>
                 </div>
             </form>
         </div>

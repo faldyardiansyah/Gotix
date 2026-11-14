@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Autentikasi — Gotix')</title>
+    <title>@yield('title', 'Autentikasi — GoTix')</title>
 
     <!-- Google Fonts: Bricolage Grotesque & DM Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,12 +27,14 @@
     <header class="relative z-10 w-full border-b-2 border-slate-900 bg-white/90 backdrop-blur-sm">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <!-- Brand Logo GOTIX -->
-            <a href="{{ route('beranda') }}" class="flex items-center gap-3 group" title="Kembali ke Beranda Gotix">
-                <div class="w-10 h-10 rounded-xl bg-amber-500 border-2 border-slate-900 text-slate-950 flex items-center justify-center font-heading font-black text-xl transition-transform group-hover:-rotate-3 duration-200 shadow-[2.5px_2.5px_0px_#18181b]">
-                    G
+            <a href="{{ route('beranda') }}" class="flex items-center gap-3 group" title="Kembali ke Beranda GoTix">
+                <div class="w-10 h-10 rounded-full bg-white border-2 border-slate-900 text-slate-950 flex items-center justify-center shadow-[2.5px_2.5px_0px_#18181b] transition-transform group-hover:rotate-6 group-hover:scale-105 duration-200">
+                    <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="#18181B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 6v6m4-6v6m4-6v6M3 10v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9M3 10l9-7 9 7"/>
+                    </svg>
                 </div>
                 <span class="font-heading text-2xl font-black tracking-tight text-slate-950">
-                    Gotix<span class="text-amber-500">.</span>
+                    GoTix<span class="text-amber-500">.</span>
                 </span>
             </a>
 
@@ -55,7 +57,7 @@
     <!-- Footer Minimalis Khusus Autentikasi -->
     <footer class="relative z-10 border-t-2 border-slate-900 bg-white py-5">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600 font-medium">
-            <p>&copy; {{ date('Y') }} Gotix Travel Indonesia. Sistem Reservasi Tiket Terproteksi.</p>
+            <p>&copy; {{ date('Y') }} GoTix Travel Indonesia. Sistem Reservasi Tiket Terproteksi.</p>
             <div class="flex items-center gap-4 text-xs font-bold text-slate-700">
                 <a href="{{ route('beranda') }}" class="hover:text-amber-600 transition">Beranda</a>
                 <span>&bull;</span>

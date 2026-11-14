@@ -39,8 +39,8 @@
 
         <a href="{{ route('member.pesanan.index') }}"
             class="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-heading font-bold rounded-full border-2 border-slate-900 transition-all duration-150 whitespace-nowrap {{ request()->routeIs('member.pesanan.*') || request()->routeIs('member.pembayaran.*') ? 'bg-amber-500 text-slate-950 shadow-[3px_3px_0px_#18181b]' : 'bg-white text-slate-800 shadow-[2px_2px_0px_#18181b] hover:bg-slate-50 hover:-translate-y-0.5' }}">
-            <svg class="w-4 h-4 {{ request()->routeIs('member.pesanan.*') || request()->routeIs('member.pembayaran.*') ? 'text-slate-950' : 'text-slate-500' }}" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6H2.25m0 0v1.5a.75.75 0 0 0 .75.75H3m0 0h1.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 0 .75.75h1.5m0 0h1.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 0 .75.75h1.5m0 0h1.5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 0 .75.75h1.5m-15-12v15m0 0h15" />
+            <svg class="w-4 h-4 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
             </svg>
             <span>Pesanan & Pembayaran</span>
         </a>

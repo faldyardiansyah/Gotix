@@ -1,94 +1,96 @@
 @extends('layouts.admin')
 
-@section('title', 'Detail Keluhan Pelanggan — Admin Gotix')
+@section('title', 'Detail Keluhan — GoTix.')
 @section('page-title', 'Detail Keluhan Pelanggan')
-@section('page-subtitle', 'Tinjau keluhan member dan kirimkan tanggapan / solusi resmi.')
+@section('page-subtitle', 'Tinjau keluhan penumpang dan kirimkan tanggapan atau solusi resmi.')
 
 @section('konten')
-<div class="max-w-3xl space-y-6">
+<div class="max-w-3xl mx-auto space-y-6">
     <div>
         <a href="{{ route('admin.keluhan.index') }}"
-           class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+           class="inline-flex items-center gap-1.5 text-xs font-heading font-black text-slate-700 hover:text-slate-950 transition">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
             </svg>
             <span>Kembali ke Daftar Keluhan</span>
         </a>
     </div>
 
-    @if (session('sukses'))
-        <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl px-4 py-3 text-sm">
-            {{ session('sukses') }}
-        </div>
-    @endif
+    @php
+        $kategoriVal = $keluhan->kategori instanceof \App\Enums\KategoriKeluhan ? $keluhan->kategori->value : (string) ($keluhan->kategori ?? '-');
+    @endphp
 
     <!-- Kartu Informasi Keluhan -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+    <x-card title="Laporan Keluhan #KLH-{{ $keluhan->id }}" subtitle="Diajukan oleh penumpang melalui portal keluhan" variant="white">
+        <div class="space-y-4 text-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b-2 border-slate-900">
+                <div>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-heading font-black bg-amber-100 text-amber-950 border border-slate-900 shadow-[1px_1px_0px_#18181b]">
+                        Kategori: {{ $kategoriVal }}
+                    </span>
+                    <h2 class="font-heading font-black text-slate-950 text-base mt-2">
+                        Keluhan dari {{ $keluhan->pengguna?->nama ?? 'Pengguna' }}
+                    </h2>
+                    <div class="text-[11px] text-slate-500 font-medium mt-0.5">
+                        Email: {{ $keluhan->pengguna?->email ?? '-' }} &bull; Telp: {{ $keluhan->pengguna?->telepon ?? '-' }}
+                    </div>
+                </div>
+                <div class="text-left sm:text-right">
+                    <span class="text-slate-500 font-bold uppercase text-[10px]">Waktu Diajukan:</span>
+                    <div class="font-bold text-slate-900 text-xs">{{ $keluhan->created_at ? $keluhan->created_at->format('d M Y, H:i') : '-' }} WIB</div>
+                </div>
+            </div>
+
             <div>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
-                    Kategori: {{ $keluhan->kategori?->value ?? (string) $keluhan->kategori }}
+                <span class="block font-heading font-black text-xs uppercase tracking-wider text-slate-900 mb-2">
+                    Uraian Keluhan:
                 </span>
-                <h2 class="font-heading font-bold text-slate-900 text-base mt-2">
-                    Keluhan dari {{ $keluhan->pengguna?->nama ?? 'Pengguna' }}
-                </h2>
-                <div class="text-xs text-slate-400 mt-0.5">
-                    Email: {{ $keluhan->pengguna?->email ?? '-' }} • Telp: {{ $keluhan->pengguna?->telepon ?? '-' }}
+                <div class="p-4 rounded-xl bg-stone-50 border-2 border-slate-900 text-sm text-slate-900 leading-relaxed whitespace-pre-wrap font-medium shadow-[2px_2px_0px_#18181b]">
+                    {{ $keluhan->deskripsi }}
                 </div>
             </div>
-            <div class="text-right text-xs text-slate-400">
-                <span>Diajukan pada:</span>
-                <div class="font-semibold text-slate-700">{{ $keluhan->created_at ? $keluhan->created_at->format('d M Y, H:i') : '-' }} WIB</div>
-            </div>
-        </div>
 
-        <div>
-            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-1.5">Isi Keluhan:</span>
-            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
-                {{ $keluhan->deskripsi }}
-            </div>
+            @if ($keluhan->balasan)
+                <div class="mt-4 pt-4 border-t-2 border-slate-900 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-heading font-black text-xs uppercase tracking-wider text-emerald-900">Tanggapan Resmi Admin:</span>
+                        <span class="text-[11px] text-slate-500 font-semibold">Dibalas pada {{ $keluhan->dibalas_pada ? $keluhan->dibalas_pada->format('d M Y, H:i') : '-' }} WIB</span>
+                    </div>
+                    <div class="p-4 rounded-xl bg-emerald-50 border-2 border-slate-900 text-sm text-emerald-950 leading-relaxed whitespace-pre-wrap font-medium shadow-[2px_2px_0px_#059669]">
+                        {{ $keluhan->balasan }}
+                    </div>
+                </div>
+            @endif
         </div>
-
-        @if ($keluhan->balasan)
-            <div class="pt-3 border-t border-slate-100 space-y-2">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-emerald-700 uppercase tracking-wider">Tanggapan / Solusi Resmi:</span>
-                    <span class="text-[11px] text-slate-400">Dibalas pada {{ $keluhan->dibalas_pada ? $keluhan->dibalas_pada->format('d M Y, H:i') : '-' }} WIB</span>
-                </div>
-                <div class="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200 text-sm text-emerald-950 leading-relaxed whitespace-pre-wrap">
-                    {{ $keluhan->balasan }}
-                </div>
-            </div>
-        @endif
-    </div>
+    </x-card>
 
     <!-- Form Kirim Balasan Admin -->
-    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs">
-        <h3 class="font-heading font-bold text-slate-900 text-sm mb-1">
-            {{ $keluhan->balasan ? 'Perbarui Balasan Keluhan' : 'Kirim Tanggapan / Balas Keluhan' }}
-        </h3>
-        <p class="text-xs text-slate-500 mb-4">
-            Tanggapan Anda akan disimpan dan dapat dibaca oleh member pada dasbor keluhan akunnya.
-        </p>
-
+    <x-card title="{{ $keluhan->balasan ? 'Perbarui Balasan Keluhan' : 'Kirim Tanggapan / Solusi Resmi' }}"
+            subtitle="Tanggapan Anda akan langsung tersinkronisasi dan dapat dibaca oleh member pada akunnya"
+            variant="paper">
         <form action="{{ route('admin.keluhan.balas', $keluhan->id) }}" method="POST" class="space-y-4">
             @csrf
             <div>
+                <label class="block font-heading font-black text-xs uppercase tracking-wider text-slate-900 mb-1.5">
+                    Isi Tanggapan Resmi Admin <span class="text-rose-600">*</span>
+                </label>
                 <textarea name="balasan" rows="4" required
-                          placeholder="Tuliskan respon resmi dan tindak lanjut dari pihak admin Gotix..."
-                          class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-600 transition">{{ old('balasan', $keluhan->balasan) }}</textarea>
+                          placeholder="Tuliskan respon resmi, klarifikasi jadwal/armada, dan tindak lanjut dari pihak operasional GoTix..."
+                          class="w-full rounded-xl border-2 border-slate-900 bg-white p-3.5 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:outline-none focus:border-amber-500 focus:shadow-[3px_3px_0px_#f59e0b] transition">{{ old('balasan', $keluhan->balasan) }}</textarea>
                 @error('balasan')
-                    <span class="text-xs text-rose-600 mt-1 block">{{ $message }}</span>
+                    <span class="text-xs text-rose-600 font-bold mt-1 block">{{ $message }}</span>
                 @enderror
             </div>
 
-            <div class="flex items-center justify-end">
-                <button type="submit"
-                        class="px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition shadow-xs">
-                    Kirim Tanggapan ke Member
-                </button>
+            <div class="flex items-center justify-end pt-2">
+                <x-button type="submit" variant="primary" size="md">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+                    </svg>
+                    <span>Kirim Tanggapan ke Penumpang</span>
+                </x-button>
             </div>
         </form>
-    </div>
+    </x-card>
 </div>
 @endsection

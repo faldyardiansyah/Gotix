@@ -24,23 +24,6 @@
             }
         }">
 
-    <!-- Top Brand Band -->
-    <div class="dcf-top">
-        <div class="max-w-md">
-            <div class="dcf-brand">
-                <span class="dcf-logo" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#18181B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M8 6v6m4-6v6m4-6v6M3 10v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9M3 10l9-7 9 7"/>
-                    </svg>
-                </span>
-                <span class="dcf-brandname">gotix travel</span>
-            </div>
-            <p class="dcf-blurb">
-                Pemesanan tiket travel antar-kota eksekutif dengan kuota 5 kursi terproteksi tanpa double-booking dan verifikasi pembayaran cepat.
-            </p>
-        </div>
-    </div>
-
     <!-- The World: Stamped GOTIX Wordmark & Crew -->
     <div class="dcf-world">
         <div class="dcf-stage">
@@ -193,7 +176,7 @@
     <!-- Bottom Bar -->
     <div class="dcf-bar">
         <p class="font-medium text-slate-800">
-            &copy; {{ date('Y') }} Gotix Travel Indonesia. Tiket Terproteksi Anti Double-Booking.
+            &copy; {{ date('Y') }} GoTix Travel Indonesia. Tiket Terproteksi Anti Double-Booking.
         </p>
 
         <ul class="flex flex-wrap items-center gap-4 text-xs font-semibold ml-auto">

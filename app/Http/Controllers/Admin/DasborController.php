@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\StatusPesanan;
 use App\Http\Controllers\Controller;
 use App\Models\Jadwal;
 use App\Models\Kendaraan;
@@ -19,8 +20,8 @@ class DasborController extends Controller
         $totalKota = Kota::count();
         $totalPengguna = Pengguna::count();
         $totalPesanan = Pesanan::count();
-        $menanggguVerifikasi = Pesanan::where('status', \App\Enums\StatusPesanan::DalamProses)->count();
-        $totalLunas = Pesanan::where('status', \App\Enums\StatusPesanan::Lunas)->count();
+        $menanggguVerifikasi = Pesanan::where('status', StatusPesanan::DalamProses)->count();
+        $totalLunas = Pesanan::where('status', StatusPesanan::Lunas)->count();
 
         $jadwalTerbaru = Jadwal::with(['kotaAsal', 'kotaTujuan', 'kendaraan', 'pesanan'])
             ->orderBy('tanggal_berangkat', 'desc')

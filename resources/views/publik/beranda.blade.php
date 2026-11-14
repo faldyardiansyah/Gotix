@@ -4,9 +4,9 @@
 
 @section('konten')
 @php
-    $kotaPilihan = isset($daftarKota) && $daftarKota->isNotEmpty()
-        ? $daftarKota->pluck('nama_kota')->toArray()
-        : ['Indramayu', 'Cirebon', 'Jakarta', 'Bandung', 'Bekasi', 'Semarang'];
+$kotaPilihan = isset($daftarKota) && $daftarKota->isNotEmpty()
+? $daftarKota->pluck('nama_kota')->toArray()
+: ['Indramayu', 'Cirebon', 'Jakarta', 'Bandung', 'Bekasi', 'Semarang'];
 @endphp
 
 <!-- HERO SECTION TACTILE DUA KOLOM -->
@@ -36,9 +36,9 @@
                     <!-- Kartu Foto Travel Retro -->
                     <div class="relative overflow-hidden rounded-2xl border-2 border-slate-900 bg-white shadow-[6px_6px_0px_#18181b]">
                         <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80"
-                             alt="Armada Travel Eksekutif GoTix"
-                             class="w-full h-72 sm:h-84 lg:h-96 object-cover"
-                             loading="eager" />
+                            alt="Armada Travel Eksekutif GoTix"
+                            class="w-full h-72 sm:h-84 lg:h-96 object-cover"
+                            loading="eager" />
 
                         <!-- Gradient Overlay Tipis Bawah -->
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent"></div>
@@ -102,12 +102,12 @@
                 </label>
                 <div class="relative">
                     <select id="input_kota_asal" name="kota_asal"
-                            class="w-full bg-[#FAFAF9] border-2 border-slate-900 rounded-xl px-3.5 py-3 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
+                        class="w-full bg-[#FAFAF9] border-2 border-slate-900 rounded-xl px-3.5 py-3 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
                         <option value="">Pilih Kota Asal...</option>
                         @foreach ($kotaPilihan as $namaKota)
-                            <option value="{{ $namaKota }}" {{ request('kota_asal') === $namaKota ? 'selected' : '' }}>
-                                {{ $namaKota }}
-                            </option>
+                        <option value="{{ $namaKota }}" {{ request('kota_asal') === $namaKota ? 'selected' : '' }}>
+                            {{ $namaKota }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -120,12 +120,12 @@
                 </label>
                 <div class="relative">
                     <select id="input_kota_tujuan" name="kota_tujuan"
-                            class="w-full bg-[#FAFAF9] border-2 border-slate-900 rounded-xl px-3.5 py-3 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
+                        class="w-full bg-[#FAFAF9] border-2 border-slate-900 rounded-xl px-3.5 py-3 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
                         <option value="">Pilih Kota Tujuan...</option>
                         @foreach ($kotaPilihan as $namaKota)
-                            <option value="{{ $namaKota }}" {{ request('kota_tujuan') === $namaKota ? 'selected' : '' }}>
-                                {{ $namaKota }}
-                            </option>
+                        <option value="{{ $namaKota }}" {{ request('kota_tujuan') === $namaKota ? 'selected' : '' }}>
+                            {{ $namaKota }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -137,15 +137,15 @@
                     Tanggal Berangkat
                 </label>
                 <input type="date" id="input_tanggal" name="tanggal"
-                       value="{{ request('tanggal', date('Y-m-d')) }}"
-                       min="{{ date('Y-m-d') }}"
-                       class="w-full bg-[#FAFAF9] border-2 border-slate-900 rounded-xl px-3.5 py-3 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
+                    value="{{ request('tanggal', date('Y-m-d')) }}"
+                    min="{{ date('Y-m-d') }}"
+                    class="w-full bg-[#FAFAF9] border-2 border-slate-900 rounded-xl px-3.5 py-3 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
             </div>
 
             <!-- Tombol Cari -->
             <div>
                 <button type="submit"
-                        class="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-amber-500 hover:bg-amber-400 active:translate-x-0.5 active:translate-y-0.5 text-slate-950 text-sm font-extrabold rounded-xl border-2 border-slate-900 shadow-[3px_3px_0px_#18181b] transition cursor-pointer">
+                    class="w-full inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-amber-500 hover:bg-amber-400 active:translate-x-0.5 active:translate-y-0.5 text-slate-950 text-sm font-extrabold rounded-xl border-2 border-slate-900 shadow-[3px_3px_0px_#18181b] transition cursor-pointer">
                     <svg class="w-4 h-4 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                     </svg>
@@ -170,7 +170,7 @@
                 </p>
             </div>
             <a href="{{ route('jadwal.cari') }}"
-               class="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-900 hover:text-amber-700 underline decoration-2 transition">
+                class="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-900 hover:text-amber-700 underline decoration-2 transition">
                 <span>Lihat Seluruh Jadwal</span>
                 <svg class="w-4 h-4 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -179,90 +179,90 @@
         </div>
 
         @if (isset($jadwalPopuler) && $jadwalPopuler->isNotEmpty())
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach ($jadwalPopuler as $jadwal)
-                    @php
-                        $terisiCount = $jadwal->pesanan->whereIn('status', [
-                            \App\Enums\StatusPesanan::BelumBayar,
-                            \App\Enums\StatusPesanan::DalamProses,
-                            \App\Enums\StatusPesanan::Lunas,
-                        ])->count();
-                        $kapasitas = $jadwal->kendaraan?->kapasitas_kursi ?? 5;
-                        $sisaKursi = max(0, $kapasitas - $terisiCount);
-                    @endphp
-                    <div class="bg-white border-2 border-slate-900 rounded-2xl p-5 shadow-[4px_4px_0px_#18181b] hover:shadow-[6px_6px_0px_#18181b] transition flex flex-col justify-between group">
-                        <div>
-                            <div class="flex items-center justify-between gap-2 mb-3">
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border border-slate-900 {{ $sisaKursi > 0 ? 'bg-emerald-100 text-emerald-900' : 'bg-rose-100 text-rose-900' }}">
-                                    {{ $sisaKursi > 0 ? $sisaKursi . ' kursi tersedia' : 'Penuh' }}
-                                </span>
-                                <span class="text-[11px] font-bold text-slate-600">
-                                    {{ $jadwal->tanggal_berangkat ? date('d M Y', strtotime($jadwal->tanggal_berangkat)) : '-' }}
-                                </span>
-                            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach ($jadwalPopuler as $jadwal)
+            @php
+            $terisiCount = $jadwal->pesanan->whereIn('status', [
+            \App\Enums\StatusPesanan::BelumBayar,
+            \App\Enums\StatusPesanan::DalamProses,
+            \App\Enums\StatusPesanan::Lunas,
+            ])->count();
+            $kapasitas = $jadwal->kendaraan?->kapasitas_kursi ?? 5;
+            $sisaKursi = max(0, $kapasitas - $terisiCount);
+            @endphp
+            <div class="bg-white border-2 border-slate-900 rounded-2xl p-5 shadow-[4px_4px_0px_#18181b] hover:shadow-[6px_6px_0px_#18181b] transition flex flex-col justify-between group">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border border-slate-900 {{ $sisaKursi > 0 ? 'bg-emerald-100 text-emerald-900' : 'bg-rose-100 text-rose-900' }}">
+                            {{ $sisaKursi > 0 ? $sisaKursi . ' kursi tersedia' : 'Penuh' }}
+                        </span>
+                        <span class="text-[11px] font-bold text-slate-600">
+                            {{ $jadwal->tanggal_berangkat ? date('d M Y', strtotime($jadwal->tanggal_berangkat)) : '-' }}
+                        </span>
+                    </div>
 
-                            <div class="space-y-1 mb-4">
-                                <div class="text-[11px] text-slate-500 uppercase font-bold tracking-wider">Rute Travel</div>
-                                <div class="text-base font-extrabold text-slate-950 flex items-center gap-2">
-                                    <span>{{ $jadwal->kotaAsal?->nama_kota ?? '-' }}</span>
-                                    <span class="text-amber-600 font-black">➔</span>
-                                    <span>{{ $jadwal->kotaTujuan?->nama_kota ?? '-' }}</span>
-                                </div>
-                                <div class="text-xs text-slate-600 font-semibold pt-1">
-                                    {{ $jadwal->kendaraan?->jenis_kendaraan ?? 'Armada Travel' }} · {{ $jadwal->jam_berangkat ? substr($jadwal->jam_berangkat, 0, 5) . ' WIB' : '' }}
-                                </div>
-                            </div>
+                    <div class="space-y-1 mb-4">
+                        <div class="text-[11px] text-slate-500 uppercase font-bold tracking-wider">Rute Travel</div>
+                        <div class="text-base font-extrabold text-slate-950 flex items-center gap-2">
+                            <span>{{ $jadwal->kotaAsal?->nama_kota ?? '-' }}</span>
+                            <span class="text-amber-600 font-black">➔</span>
+                            <span>{{ $jadwal->kotaTujuan?->nama_kota ?? '-' }}</span>
                         </div>
-
-                        <div class="pt-4 border-t-2 border-slate-100 flex items-center justify-between gap-2">
-                            <div>
-                                <div class="text-[10px] uppercase font-bold text-slate-500">Tarif / Kursi</div>
-                                <div class="text-base font-black text-slate-950">
-                                    Rp {{ number_format($jadwal->harga, 0, ',', '.') }}
-                                </div>
-                            </div>
-
-                            @auth
-                                @if ($sisaKursi > 0)
-                                    @if (Auth::user()->isMember())
-                                        <a href="{{ route('member.pesanan.create', $jadwal->id) }}"
-                                           class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl border border-slate-900 shadow-[2px_2px_0px_#18181b] active:translate-x-0.5 active:translate-y-0.5 transition">
-                                            <span>Pesan</span>
-                                            <svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                                            </svg>
-                                        </a>
-                                    @elseif (Auth::user()->isOperator())
-                                        <a href="{{ route('operator.loket.index') }}"
-                                           class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-900 shadow-[2px_2px_0px_#18181b] transition">
-                                            <span>Loket</span>
-                                        </a>
-                                    @else
-                                        <a href="{{ route('admin.jadwal.show', $jadwal->id) }}"
-                                           class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-900 shadow-[2px_2px_0px_#18181b] transition">
-                                            <span>Detail</span>
-                                        </a>
-                                    @endif
-                                @else
-                                    <span class="px-3.5 py-1.5 text-xs font-bold text-slate-400 bg-slate-100 rounded-xl border border-slate-300 cursor-not-allowed">Penuh</span>
-                                @endif
-                            @else
-                                <a href="{{ route('masuk') }}"
-                                   class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl border border-slate-900 shadow-[2px_2px_0px_#18181b] active:translate-x-0.5 active:translate-y-0.5 transition">
-                                    <span>Pesan</span>
-                                </a>
-                            @endauth
+                        <div class="text-xs text-slate-600 font-semibold pt-1">
+                            {{ $jadwal->kendaraan?->jenis_kendaraan ?? 'Armada Travel' }} · {{ $jadwal->jam_berangkat ? substr($jadwal->jam_berangkat, 0, 5) . ' WIB' : '' }}
                         </div>
                     </div>
-                @endforeach
+                </div>
+
+                <div class="pt-4 border-t-2 border-slate-100 flex items-center justify-between gap-2">
+                    <div>
+                        <div class="text-[10px] uppercase font-bold text-slate-500">Tarif / Kursi</div>
+                        <div class="text-base font-black text-slate-950">
+                            Rp {{ number_format($jadwal->harga, 0, ',', '.') }}
+                        </div>
+                    </div>
+
+                    @auth
+                    @if ($sisaKursi > 0)
+                    @if (Auth::user()->isMember())
+                    <a href="{{ route('member.pesanan.create', $jadwal->id) }}"
+                        class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl border border-slate-900 shadow-[2px_2px_0px_#18181b] active:translate-x-0.5 active:translate-y-0.5 transition">
+                        <span>Pesan</span>
+                        <svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </a>
+                    @elseif (Auth::user()->isOperator())
+                    <a href="{{ route('operator.loket.index') }}"
+                        class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-900 shadow-[2px_2px_0px_#18181b] transition">
+                        <span>Loket</span>
+                    </a>
+                    @else
+                    <a href="{{ route('admin.jadwal.show', $jadwal->id) }}"
+                        class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-900 shadow-[2px_2px_0px_#18181b] transition">
+                        <span>Detail</span>
+                    </a>
+                    @endif
+                    @else
+                    <span class="px-3.5 py-1.5 text-xs font-bold text-slate-400 bg-slate-100 rounded-xl border border-slate-300 cursor-not-allowed">Penuh</span>
+                    @endif
+                    @else
+                    <a href="{{ route('masuk') }}"
+                        class="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-black text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-xl border border-slate-900 shadow-[2px_2px_0px_#18181b] active:translate-x-0.5 active:translate-y-0.5 transition">
+                        <span>Pesan</span>
+                    </a>
+                    @endauth
+                </div>
             </div>
+            @endforeach
+        </div>
         @else
-            <div class="text-center py-12 bg-white border-2 border-slate-900 rounded-2xl shadow-[4px_4px_0px_#18181b] p-6">
-                <p class="text-slate-600 text-sm font-semibold">Belum ada jadwal keberangkatan aktif saat ini.</p>
-                <a href="{{ route('jadwal.cari') }}" class="mt-3 inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-700 hover:text-amber-800 underline decoration-2">
-                    Buka Pencarian Jadwal ➔
-                </a>
-            </div>
+        <div class="text-center py-12 bg-white border-2 border-slate-900 rounded-2xl shadow-[4px_4px_0px_#18181b] p-6">
+            <p class="text-slate-600 text-sm font-semibold">Belum ada jadwal keberangkatan aktif saat ini.</p>
+            <a href="{{ route('jadwal.cari') }}" class="mt-3 inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-700 hover:text-amber-800 underline decoration-2">
+                Buka Pencarian Jadwal ➔
+            </a>
+        </div>
         @endif
     </div>
 </section>

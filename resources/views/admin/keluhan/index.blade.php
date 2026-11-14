@@ -1,62 +1,86 @@
 @extends('layouts.admin')
 
-@section('title', 'Keluhan Member — Admin Gotix')
+@section('title', 'Keluhan Member — GoTix.')
 @section('page-title', 'Keluhan & Masukan Member')
-@section('page-subtitle', 'Pantau dan tindak lanjuti keluhan yang dikirimkan member.')
+@section('page-subtitle', 'Pantau dan tindak lanjuti masukan serta kendala yang dilaporkan penumpang.')
 
 @section('konten')
-<div class="mb-5 text-sm text-slate-600">
-    Total <strong class="text-slate-900">{{ $daftarKeluhan->count() }}</strong> keluhan masuk
+<!-- Bar Ringkasan -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border-2 border-slate-900 text-xs font-heading font-black text-slate-900 shadow-[2px_2px_0px_#18181b]">
+        <span>Total Keluhan Masuk:</span>
+        <span class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black">{{ $daftarKeluhan->count() }}</span>
+    </div>
 </div>
 
-<div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-    <div class="overflow-x-auto">
+<!-- Tabel Keluhan (Tactile Card) -->
+<x-card title="Daftar Keluhan & Masukan Penumpang" subtitle="Klik detail untuk membaca isi lengkap dan mengirimkan balasan resmi" variant="white">
+    <div class="overflow-x-auto -mx-5 -my-5 sm:-mx-6 sm:-my-6">
         <table class="w-full text-sm text-left">
-            <thead class="bg-slate-50/80 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+            <thead class="bg-stone-100 border-b-2 border-slate-900 text-xs font-heading font-black text-slate-800 uppercase tracking-wider">
                 <tr>
                     <th class="px-5 py-3.5">ID</th>
-                    <th class="px-5 py-3.5">Member Pelapor</th>
-                    <th class="px-5 py-3.5">Kategori Keluhan</th>
-                    <th class="px-5 py-3.5">Deskripsi</th>
-                    <th class="px-5 py-3.5">Tanggal</th>
+                    <th class="px-4 py-3.5">Member Pelapor</th>
+                    <th class="px-4 py-3.5">Kategori</th>
+                    <th class="px-4 py-3.5">Isi Keluhan</th>
+                    <th class="px-4 py-3.5 text-center">Status Balasan</th>
+                    <th class="px-4 py-3.5">Tanggal</th>
                     <th class="px-5 py-3.5 text-right">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y-2 border-slate-900 divide-stone-200 font-medium">
                 @forelse ($daftarKeluhan as $keluhan)
-                    <tr class="hover:bg-slate-50/50 transition">
-                        <td class="px-5 py-3.5 text-xs font-mono text-slate-400">#{{ $keluhan->id }}</td>
-                        <td class="px-5 py-3.5">
-                            <div class="font-semibold text-slate-900 text-xs">{{ $keluhan->pengguna?->nama ?? '-' }}</div>
-                            <div class="text-[11px] text-slate-400">@{{ $keluhan->pengguna?->username ?? '' }}</div>
+                    @php
+                        $kategoriVal = $keluhan->kategori instanceof \App\Enums\KategoriKeluhan ? $keluhan->kategori->value : (string) ($keluhan->kategori ?? '-');
+                        $sudahDibalas = !empty($keluhan->balasan);
+                    @endphp
+                    <tr class="hover:bg-amber-50/60 transition">
+                        <td class="px-5 py-4 text-xs font-mono font-bold text-slate-500">
+                            #KLH-{{ $keluhan->id }}
                         </td>
-                        <td class="px-5 py-3.5">
-                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                                {{ $keluhan->kategori?->value ?? (string) $keluhan->kategori ?? '-' }}
+                        <td class="px-4 py-4">
+                            <div class="font-heading font-black text-slate-950 text-xs">{{ $keluhan->pengguna?->nama ?? '-' }}</div>
+                            <div class="text-[11px] text-slate-500 font-mono">{{ $keluhan->pengguna?->username ? '@' . $keluhan->pengguna->username : '—' }}</div>
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-heading font-black bg-amber-100 text-amber-950 border border-slate-900 shadow-[1px_1px_0px_#18181b]">
+                                {{ $kategoriVal }}
                             </span>
                         </td>
-                        <td class="px-5 py-3.5 text-xs text-slate-700 max-w-xs">
-                            <span class="line-clamp-2">{{ $keluhan->deskripsi }}</span>
+                        <td class="px-4 py-4 text-xs text-slate-700 max-w-xs">
+                            <p class="line-clamp-2 font-medium">{{ $keluhan->deskripsi }}</p>
                         </td>
-                        <td class="px-5 py-3.5 text-xs text-slate-500 whitespace-nowrap">
+                        <td class="px-4 py-4 text-center whitespace-nowrap">
+                            @if ($sudahDibalas)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-heading font-black bg-emerald-100 text-emerald-950 border border-slate-900 shadow-[1px_1px_0px_#18181b]">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                                    <span>Sudah Dibalas</span>
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-heading font-black bg-rose-100 text-rose-950 border border-slate-900 shadow-[1px_1px_0px_#18181b]">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse"></span>
+                                    <span>Menunggu Tanggapan</span>
+                                </span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-4 text-xs text-slate-600 whitespace-nowrap font-medium">
                             {{ $keluhan->created_at ? date('d M Y', strtotime($keluhan->created_at)) : '-' }}
                         </td>
-                        <td class="px-5 py-3.5 text-right">
-                            <a href="{{ route('admin.keluhan.show', $keluhan->id) }}"
-                               class="inline-flex items-center px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
-                                Lihat
-                            </a>
+                        <td class="px-5 py-4 text-right whitespace-nowrap">
+                            <x-button href="{{ route('admin.keluhan.show', $keluhan->id) }}" variant="secondary" size="sm">
+                                Tanggapi
+                            </x-button>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center text-sm text-slate-500">
-                            Belum ada keluhan yang diterima. 🎉
+                        <td colspan="7" class="px-6 py-12 text-center text-sm font-bold text-slate-500">
+                            Belum ada keluhan masuk dari penumpang. 🎉
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-</div>
+</x-card>
 @endsection

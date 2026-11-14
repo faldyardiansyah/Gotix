@@ -1,78 +1,130 @@
 @extends('layouts.admin')
 
-@section('title', 'Daftar Pesanan — Admin Gotix')
+@section('title', 'Daftar Pesanan — GoTix.')
 @section('page-title', 'Rekapitulasi Seluruh Pesanan')
-@section('page-subtitle', 'Pantau semua transaksi tiket travel masuk dari member dan loket.')
+@section('page-subtitle', 'Pantau semua transaksi tiket travel masuk dari Member dan loket operasional.')
 
 @section('konten')
-<div class="mb-5 text-sm text-slate-600">
-    Total <strong class="text-slate-900">{{ $daftarPesanan->count() }}</strong> pesanan tercatat
-</div>
+<div x-data="{ tab: 'semua', search: '' }">
+    <!-- Bar Ringkasan & Filter Status -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <!-- Quick Filter Tabs (Tactile) -->
+        <div class="flex flex-wrap items-center gap-2">
+            <button type="button" @click="tab = 'semua'"
+                    :class="tab === 'semua' ? 'bg-amber-400 text-slate-950 border-2 border-slate-900 shadow-[2px_2px_0px_#18181b]' : 'bg-white text-slate-700 border-2 border-slate-900 shadow-[1px_1px_0px_#18181b] hover:bg-stone-100'"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-heading font-black transition cursor-pointer">
+                Semua Pesanan ({{ $daftarPesanan->count() }})
+            </button>
+            <button type="button" @click="tab = 'Dalam Proses'"
+                    :class="tab === 'Dalam Proses' ? 'bg-amber-400 text-slate-950 border-2 border-slate-900 shadow-[2px_2px_0px_#18181b]' : 'bg-white text-slate-700 border-2 border-slate-900 shadow-[1px_1px_0px_#18181b] hover:bg-stone-100'"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-heading font-black transition cursor-pointer flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                <span>Menunggu Verifikasi ({{ $daftarPesanan->where('status.value', 'Dalam Proses')->count() }})</span>
+            </button>
+            <button type="button" @click="tab = 'Lunas'"
+                    :class="tab === 'Lunas' ? 'bg-amber-400 text-slate-950 border-2 border-slate-900 shadow-[2px_2px_0px_#18181b]' : 'bg-white text-slate-700 border-2 border-slate-900 shadow-[1px_1px_0px_#18181b] hover:bg-stone-100'"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-heading font-black transition cursor-pointer flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Lunas ({{ $daftarPesanan->where('status.value', 'Lunas')->count() }})</span>
+            </button>
+            <button type="button" @click="tab = 'Belum Bayar'"
+                    :class="tab === 'Belum Bayar' ? 'bg-amber-400 text-slate-950 border-2 border-slate-900 shadow-[2px_2px_0px_#18181b]' : 'bg-white text-slate-700 border-2 border-slate-900 shadow-[1px_1px_0px_#18181b] hover:bg-stone-100'"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-heading font-black transition cursor-pointer">
+                Belum Bayar ({{ $daftarPesanan->where('status.value', 'Belum Bayar')->count() }})
+            </button>
+            <button type="button" @click="tab = 'Dibatalkan'"
+                    :class="tab === 'Dibatalkan' ? 'bg-amber-400 text-slate-950 border-2 border-slate-900 shadow-[2px_2px_0px_#18181b]' : 'bg-white text-slate-700 border-2 border-slate-900 shadow-[1px_1px_0px_#18181b] hover:bg-stone-100'"
+                    class="px-3.5 py-1.5 rounded-full text-xs font-heading font-black transition cursor-pointer">
+                Dibatalkan ({{ $daftarPesanan->where('status.value', 'Dibatalkan')->count() }})
+            </button>
+        </div>
 
-<div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm text-left">
-            <thead class="bg-slate-50/80 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                <tr>
-                    <th class="px-5 py-3.5">Kode Booking</th>
-                    <th class="px-5 py-3.5">Pemesan</th>
-                    <th class="px-5 py-3.5">Rute Perjalanan</th>
-                    <th class="px-5 py-3.5">Tanggal & Kursi</th>
-                    <th class="px-5 py-3.5">Total</th>
-                    <th class="px-5 py-3.5">Status</th>
-                    <th class="px-5 py-3.5 text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                @forelse ($daftarPesanan as $pesanan)
-                    @php
-                        $statusVal = $pesanan->status?->value ?? (string) $pesanan->status;
-                        $badgeClass = match ($statusVal) {
-                            'Lunas' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                            'Dalam Proses' => 'bg-sky-50 text-sky-700 border-sky-200',
-                            'Belum Bayar' => 'bg-amber-50 text-amber-700 border-amber-200',
-                            default => 'bg-rose-50 text-rose-700 border-rose-200',
-                        };
-                    @endphp
-                    <tr class="hover:bg-slate-50/50 transition">
-                        <td class="px-5 py-3.5 font-mono text-xs font-bold text-slate-900 whitespace-nowrap">
-                            {{ $pesanan->kode_pesanan }}
-                        </td>
-                        <td class="px-5 py-3.5">
-                            <div class="font-semibold text-slate-900 text-xs">{{ $pesanan->pengguna?->nama ?? '-' }}</div>
-                            <div class="text-[11px] text-slate-400">{{ $pesanan->pengguna?->telepon ?? '-' }}</div>
-                        </td>
-                        <td class="px-5 py-3.5 text-xs text-slate-700 font-medium">
-                            {{ $pesanan->jadwal?->kotaAsal?->nama_kota ?? '-' }} → {{ $pesanan->jadwal?->kotaTujuan?->nama_kota ?? '-' }}
-                        </td>
-                        <td class="px-5 py-3.5 whitespace-nowrap text-xs text-slate-700">
-                            <div>{{ $pesanan->jadwal?->tanggal_berangkat ? date('d M Y', strtotime($pesanan->jadwal->tanggal_berangkat)) : '-' }}</div>
-                            <div class="text-slate-400">Kursi #{{ $pesanan->nomor_kursi }}</div>
-                        </td>
-                        <td class="px-5 py-3.5 font-bold text-slate-900 text-xs whitespace-nowrap">
-                            Rp {{ number_format($pesanan->harga_snapshot, 0, ',', '.') }}
-                        </td>
-                        <td class="px-5 py-3.5">
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border {{ $badgeClass }}">
-                                {{ $statusVal }}
-                            </span>
-                        </td>
-                        <td class="px-5 py-3.5 text-right">
-                            <a href="{{ route('admin.pesanan.show', $pesanan->id) }}"
-                               class="inline-flex items-center px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
-                                Detail
-                            </a>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="px-6 py-12 text-center text-sm text-slate-500">
-                            Belum ada pesanan masuk.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+        <!-- Input Pencarian Cepat -->
+        <div class="relative w-full md:w-64">
+            <input type="text" x-model="search" placeholder="Cari kode booking / nama..."
+                   class="w-full rounded-xl border-2 border-slate-900 bg-white px-3.5 py-1.5 pl-9 text-xs font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:outline-none focus:border-amber-500 focus:shadow-[3px_3px_0px_#f59e0b] transition">
+            <svg class="w-4 h-4 text-slate-500 absolute left-3 top-2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+        </div>
     </div>
+
+    <!-- Tabel Pesanan (Tactile Card) -->
+    <x-card title="Daftar Seluruh Pesanan Tiket" subtitle="Kelola dan verifikasi transaksi tiket travel penumpang" variant="white">
+        <div class="overflow-x-auto -mx-5 -my-5 sm:-mx-6 sm:-my-6">
+            <table class="w-full text-sm text-left">
+                <thead class="bg-stone-100 border-b-2 border-slate-900 text-xs font-heading font-black text-slate-800 uppercase tracking-wider">
+                    <tr>
+                        <th class="px-5 py-3.5">Kode Booking</th>
+                        <th class="px-4 py-3.5">Pemesan / Penumpang</th>
+                        <th class="px-4 py-3.5">Rute Perjalanan</th>
+                        <th class="px-4 py-3.5">Jadwal & Kursi</th>
+                        <th class="px-4 py-3.5 text-right">Total Tarif</th>
+                        <th class="px-4 py-3.5 text-center">Status</th>
+                        <th class="px-5 py-3.5 text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y-2 border-slate-900 divide-stone-200 font-medium">
+                    @forelse ($daftarPesanan as $pesanan)
+                        @php
+                            $statusVal = $pesanan->status instanceof \App\Enums\StatusPesanan ? $pesanan->status->value : (string) $pesanan->status;
+                            $isWalkIn = ($pesanan->pengguna?->peran?->value ?? '') === 'Operator';
+                        @endphp
+                        <tr x-show="(tab === 'semua' || tab === '{{ $statusVal }}') && ('{{ strtolower($pesanan->kode_pesanan) }} {{ strtolower($pesanan->pengguna?->nama ?? '') }}'.includes(search.toLowerCase()))"
+                            class="hover:bg-amber-50/60 transition">
+                            <td class="px-5 py-4 font-mono font-black text-xs text-slate-950 whitespace-nowrap">
+                                {{ $pesanan->kode_pesanan }}
+                            </td>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-slate-950 text-xs">{{ $pesanan->pengguna?->nama ?? '-' }}</span>
+                                    @if ($isWalkIn)
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-heading font-black bg-stone-200 border border-slate-900 text-slate-900">
+                                            Loket
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-heading font-black bg-amber-100 border border-slate-900 text-slate-950">
+                                            Member
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="text-[11px] text-slate-500 font-mono mt-0.5">{{ $pesanan->pengguna?->telepon ?? '-' }}</div>
+                            </td>
+                            <td class="px-4 py-4 text-xs font-bold text-slate-900">
+                                {{ $pesanan->jadwal?->kotaAsal?->nama_kota ?? '-' }}
+                                <span class="text-amber-600 font-black px-1">&rarr;</span>
+                                {{ $pesanan->jadwal?->kotaTujuan?->nama_kota ?? '-' }}
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap text-xs text-slate-700">
+                                <div class="font-bold text-slate-900">
+                                    {{ $pesanan->jadwal?->tanggal_berangkat ? date('d M Y', strtotime($pesanan->jadwal->tanggal_berangkat)) : '-' }}
+                                </div>
+                                <div class="text-amber-800 font-heading font-black text-[11px] mt-0.5">
+                                    Kursi #{{ $pesanan->nomor_kursi }}
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 text-right font-heading font-black text-slate-950 text-sm whitespace-nowrap">
+                                Rp {{ number_format($pesanan->harga_snapshot, 0, ',', '.') }}
+                            </td>
+                            <td class="px-4 py-4 text-center whitespace-nowrap">
+                                <x-badge-status :status="$pesanan->status" size="sm" />
+                            </td>
+                            <td class="px-5 py-4 text-right whitespace-nowrap">
+                                <x-button href="{{ route('admin.pesanan.show', $pesanan->id) }}" variant="secondary" size="sm">
+                                    Detail
+                                </x-button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-sm font-bold text-slate-600">
+                                Belum ada transaksi pesanan masuk.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </x-card>
 </div>
 @endsection

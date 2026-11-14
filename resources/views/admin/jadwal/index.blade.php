@@ -1,39 +1,39 @@
 @extends('layouts.admin')
 
-@section('title', 'Master Jadwal — Admin Gotix')
+@section('title', 'Master Jadwal — GoTix.')
 @section('page-title', 'Master Jadwal Keberangkatan')
-@section('page-subtitle', 'Kelola rute, armada, tarif, dan jadwal perjalanan antar kota.')
+@section('page-subtitle', 'Kelola rute, armada, tarif, dan kuota 5 kursi perjalanan travel antar-kota.')
 
 @section('konten')
-<!-- Bar Aksi -->
+<!-- Bar Aksi Atas -->
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-    <div class="text-sm text-slate-600">
-        Total <strong class="text-slate-900">{{ $jadwalList->count() }}</strong> jadwal terdaftar
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border-2 border-slate-900 text-xs font-heading font-black text-slate-900 shadow-[2px_2px_0px_#18181b]">
+        <span>Total Jadwal Aktif:</span>
+        <span class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black">{{ $jadwalList->count() }}</span>
     </div>
-    <a href="{{ route('admin.jadwal.create') }}"
-       class="inline-flex items-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition shadow-xs">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+    <x-button href="{{ route('admin.jadwal.create') }}" variant="primary" size="md">
+        <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
         <span>Tambah Jadwal Baru</span>
-    </a>
+    </x-button>
 </div>
 
-<!-- Tabel Jadwal -->
-<div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-    <div class="overflow-x-auto">
+<!-- Tabel Jadwal (Tactile Card) -->
+<x-card title="Daftar Jadwal Perjalanan" subtitle="Pilih jadwal untuk melihat manifest penumpang atau mengubah tarif dan armada" variant="white">
+    <div class="overflow-x-auto -mx-5 -my-5 sm:-mx-6 sm:-my-6">
         <table class="w-full text-sm text-left">
-            <thead class="bg-slate-50/80 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+            <thead class="bg-stone-100 border-b-2 border-slate-900 text-xs font-heading font-black text-slate-800 uppercase tracking-wider">
                 <tr>
                     <th class="px-5 py-3.5">Rute Perjalanan</th>
-                    <th class="px-5 py-3.5">Tanggal & Jam</th>
-                    <th class="px-5 py-3.5">Armada</th>
-                    <th class="px-5 py-3.5">Tarif</th>
-                    <th class="px-5 py-3.5">Sisa Kursi</th>
+                    <th class="px-4 py-3.5">Tanggal & Jam</th>
+                    <th class="px-4 py-3.5">Armada Kendaraan</th>
+                    <th class="px-4 py-3.5 text-right">Tarif</th>
+                    <th class="px-4 py-3.5 text-center">Ketersediaan Kursi</th>
                     <th class="px-5 py-3.5 text-right">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y-2 border-slate-900 divide-stone-200 font-medium">
                 @forelse ($jadwalList as $jadwal)
                     @php
                         $terisi = $jadwal->pesanan->whereIn('status', [
@@ -41,57 +41,62 @@
                             \App\Enums\StatusPesanan::DalamProses,
                             \App\Enums\StatusPesanan::Lunas,
                         ])->count();
-                        $kapasitas = $jadwal->kendaraan?->kapasitas_kursi ?? 5;
+                        $kapasitas = max((int) ($jadwal->kendaraan?->kapasitas_kursi ?? 5), 1);
                         $sisa = max(0, $kapasitas - $terisi);
+                        $penuh = $sisa === 0;
                     @endphp
-                    <tr class="hover:bg-slate-50/50 transition">
+                    <tr class="hover:bg-amber-50/60 transition">
                         <td class="px-5 py-4">
-                            <div class="font-semibold text-slate-900 text-sm">
-                                {{ $jadwal->kotaAsal?->nama_kota ?? '-' }} → {{ $jadwal->kotaTujuan?->nama_kota ?? '-' }}
+                            <div class="font-heading font-black text-slate-950 text-sm">
+                                {{ $jadwal->kotaAsal?->nama_kota ?? '-' }}
+                                <span class="text-amber-600 font-black px-1">&rarr;</span>
+                                {{ $jadwal->kotaTujuan?->nama_kota ?? '-' }}
+                            </div>
+                            <span class="text-[11px] text-slate-500 font-mono">ID: #JDW-{{ $jadwal->id }}</span>
+                        </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-xs text-slate-700">
+                            <div class="font-bold text-slate-900">
+                                {{ $jadwal->tanggal_berangkat ? date('d M Y', strtotime($jadwal->tanggal_berangkat)) : '-' }}
+                            </div>
+                            <div class="text-slate-500 font-semibold">
+                                {{ $jadwal->jam_berangkat ? substr($jadwal->jam_berangkat, 0, 5) . ' WIB' : '-' }}
                             </div>
                         </td>
-                        <td class="px-5 py-4 whitespace-nowrap text-xs text-slate-700">
-                            <div class="font-semibold">{{ $jadwal->tanggal_berangkat ? date('d M Y', strtotime($jadwal->tanggal_berangkat)) : '-' }}</div>
-                            <div class="text-slate-500">{{ $jadwal->jam_berangkat ? substr($jadwal->jam_berangkat, 0, 5) . ' WIB' : '-' }}</div>
+                        <td class="px-4 py-4 text-xs text-slate-700">
+                            <div class="font-bold text-slate-900">{{ $jadwal->kendaraan?->jenis_kendaraan ?? '-' }}</div>
+                            <div class="text-slate-500 font-mono font-semibold">{{ $jadwal->kendaraan?->nomor_polisi ?? '-' }}</div>
                         </td>
-                        <td class="px-5 py-4 text-xs text-slate-700">
-                            <div class="font-medium">{{ $jadwal->kendaraan?->jenis_kendaraan ?? '-' }}</div>
-                            <div class="text-slate-400 font-mono">{{ $jadwal->kendaraan?->nomor_polisi ?? '-' }}</div>
-                        </td>
-                        <td class="px-5 py-4 font-bold text-slate-900 text-sm whitespace-nowrap">
+                        <td class="px-4 py-4 text-right font-heading font-black text-slate-950 text-sm whitespace-nowrap">
                             Rp {{ number_format($jadwal->harga, 0, ',', '.') }}
                         </td>
-                        <td class="px-5 py-4">
+                        <td class="px-4 py-4 text-center whitespace-nowrap">
                             @if ($sisa > 0)
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                                    {{ $sisa }} tersedia
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-heading font-black bg-emerald-100 text-emerald-950 border border-slate-900 shadow-[1px_1px_0px_#18181b]">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                                    <span>{{ $sisa }} Kursi Tersedia</span>
                                 </span>
                             @else
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-                                    Penuh
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-heading font-black bg-rose-100 text-rose-950 border border-slate-900 shadow-[1px_1px_0px_#18181b]">
+                                    <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                                    <span>Penuh (0 Kursi)</span>
                                 </span>
                             @endif
                         </td>
                         <td class="px-5 py-4 text-right whitespace-nowrap">
                             <div class="flex items-center justify-end gap-2">
-                                <a href="{{ route('admin.jadwal.show', $jadwal->id) }}"
-                                   class="px-2.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+                                <x-button href="{{ route('admin.jadwal.show', $jadwal->id) }}" variant="secondary" size="sm">
                                     Detail
-                                </a>
-                                <a href="{{ route('admin.jadwal.edit', $jadwal->id) }}"
-                                   class="px-2.5 py-1.5 text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg transition">
+                                </x-button>
+                                <x-button href="{{ route('admin.jadwal.edit', $jadwal->id) }}" variant="primary" size="sm">
                                     Edit
-                                </a>
+                                </x-button>
                                 <form action="{{ route('admin.jadwal.destroy', $jadwal->id) }}" method="POST"
-                                      onsubmit="return confirm('Hapus jadwal ini? Tindakan tidak dapat dibatalkan.')">
+                                      onsubmit="return confirm('Hapus jadwal keberangkatan ini? Seluruh data terkait tidak dapat dikembalikan.')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit"
-                                            class="px-2.5 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition">
+                                    <x-button type="submit" variant="danger" size="sm">
                                         Hapus
-                                    </button>
+                                    </x-button>
                                 </form>
                             </div>
                         </td>
@@ -99,15 +104,17 @@
                 @empty
                     <tr>
                         <td colspan="6" class="px-6 py-12 text-center">
-                            <div class="text-sm text-slate-500">Belum ada jadwal perjalanan terdaftar.</div>
-                            <a href="{{ route('admin.jadwal.create') }}" class="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:text-sky-700">
-                                Tambah jadwal pertama →
-                            </a>
+                            <div class="text-sm font-bold text-slate-700">Belum ada jadwal perjalanan terdaftar.</div>
+                            <div class="mt-4">
+                                <x-button href="{{ route('admin.jadwal.create') }}" variant="primary" size="sm">
+                                    Tambah Jadwal Pertama &rarr;
+                                </x-button>
+                            </div>
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-</div>
+</x-card>
 @endsection

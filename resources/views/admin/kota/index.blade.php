@@ -1,69 +1,81 @@
 @extends('layouts.admin')
 
-@section('title', 'Master Kota — Admin Gotix')
-@section('page-title', 'Master Data Kota')
-@section('page-subtitle', 'Daftar kota asal & tujuan yang tersedia di sistem Gotix.')
+@section('title', 'Master Kota — GoTix.')
+@section('page-title', 'Master Data Kota & Wilayah')
+@section('page-subtitle', 'Daftar kota asal dan kota tujuan layanan travel Gotix di Lampung.')
 
 @section('konten')
+<!-- Bar Aksi Atas -->
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-    <div class="text-sm text-slate-600">
-        Total <strong class="text-slate-900">{{ $daftarKota->count() }}</strong> kota terdaftar
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border-2 border-slate-900 text-xs font-heading font-black text-slate-900 shadow-[2px_2px_0px_#18181b]">
+        <span>Total Kota Terdaftar:</span>
+        <span class="px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 font-black">{{ $daftarKota->count() }}</span>
     </div>
-    <a href="{{ route('admin.kota.create') }}"
-       class="inline-flex items-center gap-2 px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl transition shadow-xs">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+    <x-button href="{{ route('admin.kota.create') }}" variant="primary" size="md">
+        <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
-        <span>Tambah Kota</span>
-    </a>
+        <span>Tambah Kota Baru</span>
+    </x-button>
 </div>
 
-<div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-    <div class="overflow-x-auto">
+<!-- Tabel Kota (Tactile Card) -->
+<x-card title="Daftar Kota & Terminal" subtitle="Kota-kota yang terhubung dalam rute perjalanan travel" variant="white">
+    <div class="overflow-x-auto -mx-5 -my-5 sm:-mx-6 sm:-my-6">
         <table class="w-full text-sm text-left">
-            <thead class="bg-slate-50/80 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+            <thead class="bg-stone-100 border-b-2 border-slate-900 text-xs font-heading font-black text-slate-800 uppercase tracking-wider">
                 <tr>
                     <th class="px-5 py-3.5">ID</th>
                     <th class="px-5 py-3.5">Nama Kota / Wilayah</th>
-                    <th class="px-5 py-3.5">Jadwal Sebagai Asal</th>
-                    <th class="px-5 py-3.5">Jadwal Sebagai Tujuan</th>
+                    <th class="px-4 py-3.5 text-center">Jadwal Keberangkatan (Asal)</th>
+                    <th class="px-4 py-3.5 text-center">Jadwal Kedatangan (Tujuan)</th>
                     <th class="px-5 py-3.5 text-right">Aksi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y-2 border-slate-900 divide-stone-200 font-medium">
                 @forelse ($daftarKota as $kota)
-                    <tr class="hover:bg-slate-50/50 transition">
-                        <td class="px-5 py-3.5 text-xs font-mono text-slate-400">#{{ $kota->id }}</td>
-                        <td class="px-5 py-3.5 font-semibold text-slate-900">{{ $kota->nama_kota }}</td>
-                        <td class="px-5 py-3.5 text-xs text-slate-700">{{ $kota->jadwal_asal_count ?? 0 }} jadwal</td>
-                        <td class="px-5 py-3.5 text-xs text-slate-700">{{ $kota->jadwal_tujuan_count ?? 0 }} jadwal</td>
-                        <td class="px-5 py-3.5 text-right">
+                    <tr class="hover:bg-amber-50/60 transition">
+                        <td class="px-5 py-4 text-xs font-mono font-bold text-slate-500">
+                            #KTA-{{ $kota->id }}
+                        </td>
+                        <td class="px-5 py-4 font-heading font-black text-slate-950 text-base">
+                            {{ $kota->nama_kota }}
+                        </td>
+                        <td class="px-4 py-4 text-center">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 border border-slate-900 text-xs font-heading font-black text-slate-900 shadow-[1px_1px_0px_#18181b]">
+                                {{ $kota->jadwal_asal_count ?? 0 }} Jadwal
+                            </span>
+                        </td>
+                        <td class="px-4 py-4 text-center">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-100 border border-slate-900 text-xs font-heading font-black text-slate-900 shadow-[1px_1px_0px_#18181b]">
+                                {{ $kota->jadwal_tujuan_count ?? 0 }} Jadwal
+                            </span>
+                        </td>
+                        <td class="px-5 py-4 text-right whitespace-nowrap">
                             <div class="flex items-center justify-end gap-2">
-                                <a href="{{ route('admin.kota.edit', $kota->id) }}"
-                                   class="inline-flex items-center px-2.5 py-1.5 text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg transition">
+                                <x-button href="{{ route('admin.kota.edit', $kota->id) }}" variant="primary" size="sm">
                                     Edit
-                                </a>
+                                </x-button>
                                 <form action="{{ route('admin.kota.destroy', $kota->id) }}" method="POST"
-                                      onsubmit="return confirm('Hapus kota {{ $kota->nama_kota }}? Data jadwal terkait mungkin terpengaruh.')">
+                                      onsubmit="return confirm('Hapus kota {{ $kota->nama_kota }}? Seluruh rute terkait mungkin terdampak.')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit"
-                                            class="inline-flex items-center px-2.5 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition">
+                                    <x-button type="submit" variant="danger" size="sm">
                                         Hapus
-                                    </button>
+                                    </x-button>
                                 </form>
                             </div>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-10 text-center text-sm text-slate-500">
-                            Belum ada data kota tersimpan.
+                        <td colspan="5" class="px-6 py-12 text-center text-sm font-bold text-slate-600">
+                            Belum ada data kota yang terdaftar.
                         </td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
-</div>
+</x-card>
 @endsection

@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Masuk ke Akun — Gotix')
+@section('title', 'Masuk ke Akun — GoTix')
 
 @section('konten')
 <div class="w-full max-w-md my-auto">

@@ -1,28 +1,31 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Jadwal — Admin Gotix')
+@section('title', 'Edit Jadwal — GoTix.')
 @section('page-title', 'Edit Jadwal Keberangkatan')
-@section('page-subtitle', 'Perbarui data rute, armada, tarif, atau waktu berangkat.')
+@section('page-subtitle', 'Perbarui data rute, armada, tarif, atau waktu berangkat travel.')
 
 @section('konten')
-<div class="max-w-2xl">
-    <div class="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100">
-            <h2 class="font-heading font-bold text-slate-900 text-sm">
-                Edit Jadwal:
-                {{ $jadwal->kotaAsal?->nama_kota ?? '-' }} → {{ $jadwal->kotaTujuan?->nama_kota ?? '-' }}
-            </h2>
-            <p class="text-xs text-slate-500 mt-0.5">
-                {{ $jadwal->tanggal_berangkat ? $jadwal->tanggal_berangkat->format('d M Y') : '-' }} pukul {{ $jadwal->jam_berangkat ? substr($jadwal->jam_berangkat, 0, 5) : '-' }} WIB
-            </p>
-        </div>
+<div class="max-w-2xl mx-auto">
+    <div class="mb-4">
+        <a href="{{ route('admin.jadwal.index') }}"
+           class="inline-flex items-center gap-1.5 text-xs font-heading font-black text-slate-700 hover:text-slate-950 transition">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+            <span>Kembali ke Master Jadwal</span>
+        </a>
+    </div>
+
+    <x-card title="Edit Jadwal #JDW-{{ $jadwal->id }}"
+            subtitle="{{ $jadwal->kotaAsal?->nama_kota ?? '-' }} → {{ $jadwal->kotaTujuan?->nama_kota ?? '-' }} &bull; {{ $jadwal->tanggal_berangkat ? date('d M Y', strtotime($jadwal->tanggal_berangkat)) : '-' }}"
+            variant="white">
         <form action="{{ route('admin.jadwal.update', $jadwal->id) }}" method="POST">
             @csrf
             @method('PUT')
-            <div class="p-6 space-y-5">
+            <div class="space-y-5">
 
                 @if ($errors->any())
-                    <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm space-y-1">
+                    <div class="rounded-xl border-2 border-slate-900 bg-rose-50 text-rose-950 p-4 text-xs font-bold space-y-1 shadow-[2px_2px_0px_#18181b]">
                         @foreach ($errors->all() as $error)
                             <p>• {{ $error }}</p>
                         @endforeach
@@ -31,22 +34,26 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Kota Asal</label>
-                        <select name="kota_asal_id"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-600 transition">
+                        <label class="block font-heading font-black text-xs uppercase tracking-wider text-slate-900 mb-1.5">
+                            Kota Asal <span class="text-rose-600">*</span>
+                        </label>
+                        <select name="kota_asal_id" required
+                                class="w-full rounded-xl border-2 border-slate-900 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:outline-none focus:border-amber-500 focus:shadow-[3px_3px_0px_#f59e0b] transition">
                             @foreach ($daftarKota as $kota)
-                                <option value="{{ $kota->id }}" {{ (old('kota_asal_id', $jadwal->kota_asal_id) == $kota->id) ? 'selected' : '' }}>
+                                <option value="{{ $kota->id }}" {{ old('kota_asal_id', $jadwal->kota_asal_id) == $kota->id ? 'selected' : '' }}>
                                     {{ $kota->nama_kota }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Kota Tujuan</label>
-                        <select name="kota_tujuan_id"
-                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-600 transition">
+                        <label class="block font-heading font-black text-xs uppercase tracking-wider text-slate-900 mb-1.5">
+                            Kota Tujuan <span class="text-rose-600">*</span>
+                        </label>
+                        <select name="kota_tujuan_id" required
+                                class="w-full rounded-xl border-2 border-slate-900 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:outline-none focus:border-amber-500 focus:shadow-[3px_3px_0px_#f59e0b] transition">
                             @foreach ($daftarKota as $kota)
-                                <option value="{{ $kota->id }}" {{ (old('kota_tujuan_id', $jadwal->kota_tujuan_id) == $kota->id) ? 'selected' : '' }}>
+                                <option value="{{ $kota->id }}" {{ old('kota_tujuan_id', $jadwal->kota_tujuan_id) == $kota->id ? 'selected' : '' }}>
                                     {{ $kota->nama_kota }}
                                 </option>
                             @endforeach
@@ -55,12 +62,14 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Armada Kendaraan</label>
-                    <select name="kendaraan_id"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-600 transition">
+                    <label class="block font-heading font-black text-xs uppercase tracking-wider text-slate-900 mb-1.5">
+                        Armada Kendaraan <span class="text-rose-600">*</span>
+                    </label>
+                    <select name="kendaraan_id" required
+                            class="w-full rounded-xl border-2 border-slate-900 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:outline-none focus:border-amber-500 focus:shadow-[3px_3px_0px_#f59e0b] transition">
                         @foreach ($daftarKendaraan as $kendaraan)
-                            <option value="{{ $kendaraan->id }}" {{ (old('kendaraan_id', $jadwal->kendaraan_id) == $kendaraan->id) ? 'selected' : '' }}>
-                                {{ $kendaraan->jenis_kendaraan }} — {{ $kendaraan->nomor_polisi }} ({{ $kendaraan->warna }})
+                            <option value="{{ $kendaraan->id }}" {{ old('kendaraan_id', $jadwal->kendaraan_id) == $kendaraan->id ? 'selected' : '' }}>
+                                {{ $kendaraan->jenis_kendaraan }} — {{ $kendaraan->nomor_polisi }} (Warna: {{ $kendaraan->warna }}, Kapasitas: {{ $kendaraan->kapasitas_kursi ?? 5 }} Kursi)
                             </option>
                         @endforeach
                     </select>
@@ -68,37 +77,43 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tanggal Berangkat</label>
+                        <label class="block font-heading font-black text-xs uppercase tracking-wider text-slate-900 mb-1.5">
+                            Tanggal Berangkat <span class="text-rose-600">*</span>
+                        </label>
                         <input type="date" name="tanggal_berangkat"
-                               value="{{ old('tanggal_berangkat', $jadwal->tanggal_berangkat?->format('Y-m-d')) }}"
-                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-600 transition">
+                               value="{{ old('tanggal_berangkat', $jadwal->tanggal_berangkat ? date('Y-m-d', strtotime($jadwal->tanggal_berangkat)) : '') }}"
+                               required
+                               class="w-full rounded-xl border-2 border-slate-900 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:outline-none focus:border-amber-500 focus:shadow-[3px_3px_0px_#f59e0b] transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Jam Berangkat</label>
+                        <label class="block font-heading font-black text-xs uppercase tracking-wider text-slate-900 mb-1.5">
+                            Jam Berangkat <span class="text-rose-600">*</span>
+                        </label>
                         <input type="time" name="jam_berangkat"
                                value="{{ old('jam_berangkat', $jadwal->jam_berangkat ? substr($jadwal->jam_berangkat, 0, 5) : '') }}"
-                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-600 transition">
+                               required
+                               class="w-full rounded-xl border-2 border-slate-900 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:outline-none focus:border-amber-500 focus:shadow-[3px_3px_0px_#f59e0b] transition">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Harga Tiket (Rp)</label>
-                    <input type="number" name="harga" value="{{ old('harga', $jadwal->harga) }}" min="0"
-                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-600 transition">
+                    <label class="block font-heading font-black text-xs uppercase tracking-wider text-slate-900 mb-1.5">
+                        Tarif Tiket Per Kursi (Rp) <span class="text-rose-600">*</span>
+                    </label>
+                    <input type="number" name="harga" value="{{ old('harga', $jadwal->harga) }}" min="0" required
+                           class="w-full rounded-xl border-2 border-slate-900 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-900 shadow-[2px_2px_0px_#18181b] focus:outline-none focus:border-amber-500 focus:shadow-[3px_3px_0px_#f59e0b] transition">
                 </div>
 
-                <div class="pt-3 border-t border-slate-100 flex items-center gap-3">
-                    <button type="submit"
-                            class="flex-1 inline-flex items-center justify-center py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold rounded-xl transition">
-                        Simpan Perubahan
-                    </button>
-                    <a href="{{ route('admin.jadwal.index') }}"
-                       class="flex-1 inline-flex items-center justify-center py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition text-center">
+                <div class="pt-4 border-t-2 border-slate-900 flex items-center gap-3">
+                    <x-button type="submit" variant="primary" size="md" class="flex-1">
+                        Perbarui Jadwal
+                    </x-button>
+                    <x-button href="{{ route('admin.jadwal.index') }}" variant="secondary" size="md" class="flex-1">
                         Batal
-                    </a>
+                    </x-button>
                 </div>
             </div>
         </form>
-    </div>
+    </x-card>
 </div>
 @endsection

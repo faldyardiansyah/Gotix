@@ -121,6 +121,8 @@ Route::middleware(['auth', 'peran:Admin'])->prefix('admin')->name('admin.')->gro
 
     // Pengguna
     Route::get('/pengguna', [Admin\PenggunaController::class, 'index'])->name('pengguna.index');
+    Route::get('/pengguna/tambah', [Admin\PenggunaController::class, 'create'])->name('pengguna.create');
+    Route::post('/pengguna', [Admin\PenggunaController::class, 'store'])->name('pengguna.store');
     Route::get('/pengguna/{id}', [Admin\PenggunaController::class, 'show'])->name('pengguna.show');
 
     // Pesanan (Lihat Detail, Terima/Verifikasi, Tolak)
