@@ -1,0 +1,46 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gotix_app
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - APP_NAME=GOTIX
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=${APP_KEY}
+      - APP_URL=http://localhost:8080
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-gotix}
+      - DB_USERNAME=${DB_USERNAME:-gotix_user}
+      - DB_PASSWORD=${DB_PASSWORD:-gotix_password123}
+    depends_on:
+      - db
+    networks:
+      - gotix-network
+
+  db:
+    image: mysql:8.0
+    container_name: gotix_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-gotix}
+      MYSQL_USER: ${DB_USERNAME:-gotix_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-gotix_password123}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-gotix_root_secret}
+    volumes:
+      - gotix_db_data:/var/lib/mysql
+    networks:
+      - gotix-network
+
+volumes:
+  gotix_db_data:
+
+networks:
+  gotix-network:
+    driver: bridge

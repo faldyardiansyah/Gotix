@@ -1,0 +1,13 @@
+.git
+.github
+node_modules
+vendor
+.env
+.env.*
+!.env.example
+*.log
+storage/logs/*.log
+tests
+.phpunit.cache
+.phpunit.result.cache
+docker-compose*.yml
